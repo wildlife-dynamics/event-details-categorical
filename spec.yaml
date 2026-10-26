@@ -17,7 +17,7 @@ requirements:
 
   # wd-partner-tasks: src/ecoscope-workflows-ext-wd (categorical tasks: _categorical.py).
   - name: ecoscope-workflows-ext-wd
-    version: "0.0.7"
+    version: "0.0.8"
     channel: https://repo.prefix.dev/ecoscope-workflows-custom/
 
 rjsf-overrides:

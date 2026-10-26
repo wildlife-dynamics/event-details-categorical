@@ -560,7 +560,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/xyzservices-2026.9.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.2-pyh5ded981_0.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-custom-0.1.2-pyh4616a5c_0.conda
-      - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-wd-0.0.7-pyh4616a5c_0.conda
+      - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-wd-0.0.8-pyh4616a5c_0.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/earthranger-client-1.0.49-pyh4616a5c_0.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/ecoscope-2.26.0-pyh4616a5c_5.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/ecoscope-earthranger-io-core-0.0.28-pyh4616a5c_0.conda
@@ -1088,7 +1088,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/xyzservices-2026.9.1-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.2-pyh5ded981_0.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-custom-0.1.2-pyh4616a5c_0.conda
-      - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-wd-0.0.7-pyh4616a5c_0.conda
+      - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-wd-0.0.8-pyh4616a5c_0.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/earthranger-client-1.0.49-pyh4616a5c_0.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/ecoscope-2.26.0-pyh4616a5c_5.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/ecoscope-earthranger-io-core-0.0.28-pyh4616a5c_0.conda
@@ -1598,7 +1598,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zlib-ng-2.3.3-h646e873_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-custom-0.1.2-pyh4616a5c_0.conda
-      - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-wd-0.0.7-pyh4616a5c_0.conda
+      - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-wd-0.0.8-pyh4616a5c_0.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/earthranger-client-1.0.49-pyh4616a5c_0.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/ecoscope-2.26.0-pyh4616a5c_5.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/ecoscope-earthranger-io-core-0.0.28-pyh4616a5c_0.conda
@@ -2102,7 +2102,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-ng-2.3.3-h31dac16_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-hf451053_7.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-custom-0.1.2-pyh4616a5c_0.conda
-      - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-wd-0.0.7-pyh4616a5c_0.conda
+      - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-wd-0.0.8-pyh4616a5c_0.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/earthranger-client-1.0.49-pyh4616a5c_0.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/ecoscope-2.26.0-pyh4616a5c_5.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/ecoscope-earthranger-io-core-0.0.28-pyh4616a5c_0.conda
@@ -2595,7 +2595,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/zlib-ng-2.3.3-h0261ad2_1.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/zstd-1.5.7-h534d264_7.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-custom-0.1.2-pyh4616a5c_0.conda
-      - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-wd-0.0.7-pyh4616a5c_0.conda
+      - conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-wd-0.0.8-pyh4616a5c_0.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/earthranger-client-1.0.49-pyh4616a5c_0.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/ecoscope-2.26.0-pyh4616a5c_5.conda
       - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/ecoscope-earthranger-io-core-0.0.28-pyh4616a5c_0.conda
@@ -4257,7 +4257,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/llvm-openmp-23.1.4-h49e36cd_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/lz4-c-1.10.0-h6a83c73_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/markupsafe-3.0.4-py313h868807b_1.conda
-      - conda: https://conda.anaconda.org/conda-forge/win-64/mkl-2026.2.0-hac47afa_882.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/mkl-2026.1.0-hac47afa_235.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/nlohmann_json-3.12.0-h5112557_2.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/numpy-2.5.4-py313ha8dc839_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/obstore-0.11.1-py313hf61f64f_1.conda
@@ -30619,20 +30619,6 @@ packages:
   run_exports: {}
   size: 114686732
   timestamp: 1787725739779
-- conda: https://conda.anaconda.org/conda-forge/win-64/mkl-2026.2.0-hac47afa_882.conda
-  sha256: 012fea9803989158ef12a7b807385e3f6b16daf4900085b9cc0318552ace751e
-  md5: fb8f28b9ba8cf4a50e0ce10f2bc727e2
-  depends:
-  - llvm-openmp >=23.1.4
-  - tbb >=2023.1.0
-  - ucrt >=10.0.20348.0
-  - vc >=14.3,<15
-  - vc14_runtime >=14.44.35208
-  license: LicenseRef-IntelSimplifiedSoftwareOct2022
-  license_family: Proprietary
-  run_exports: {}
-  size: 117931516
-  timestamp: 1792649793594
 - conda: https://conda.anaconda.org/conda-forge/win-64/mkl-devel-2026.1.0-h57928b3_235.conda
   sha256: cb62abd7c4e6eef1d9651ef15243f6e41e884ca3cba51dbf2dd62429e10a4056
   md5: 18a9666d217a049d1e49e808d6142b6e
@@ -32448,9 +32434,9 @@ packages:
   run_exports: {}
   size: 245645
   timestamp: 1791349353900
-- conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-wd-0.0.7-pyh4616a5c_0.conda
-  sha256: 2f624b871df3bd96ed8ba28a6bd39fed3f93a5e6e53f2c45f08f258d00d1057c
-  md5: b4b9b52a5ea20a10ad387532db1eb5ea
+- conda: https://repo.prefix.dev/ecoscope-workflows-custom/noarch/ecoscope-workflows-ext-wd-0.0.8-pyh4616a5c_0.conda
+  sha256: 4371d332302441a8114dfc2bc736c8c27368ca15feb334c1a09b68a5833db3a4
+  md5: a1c48f3662736318908ee45904da353f
   depends:
   - python
   - ecoscope-platform >=2.15.1
@@ -32462,8 +32448,8 @@ packages:
   - pillow
   license: BSD-3-Clause
   run_exports: {}
-  size: 68374
-  timestamp: 1792997779487
+  size: 68991
+  timestamp: 1793012181381
 - conda: https://repo.prefix.dev/ecoscope-workflows/noarch/earthranger-client-1.0.49-pyh4616a5c_0.conda
   sha256: 9a3ac6384aafd7610a35b2a4c81413187ca9e886d364d955f0df54d1574a52d6
   depends:
