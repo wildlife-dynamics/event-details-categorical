@@ -59,7 +59,7 @@ make build     # build unreleased ext-wd into /tmp/ecoscope-workflows-custom/cat
 make dev       # fast compile with the editable ext-wd (wt-compiler-env-overrides.toml)
 make run       # run param.yaml on real data -> /tmp/event-details-categorical/output
 make open      # preview the dashboard (layout.json, view selector)
-make test      # compiled tests, mock IO from mock-io/ (CASE=naibungalower-post-report)
+make test      # compiled tests, mock IO from mock-io/ or mock-io/<CASE>/ (CASE=naibungalower-post-report)
 ```
 
 Test cases (`test-cases.yaml`): naibungalower post reports by month, wildlife sightings by reporter, ranger sightings with the summary grid.

@@ -18,8 +18,8 @@ Open work for the Event Details - Categorical Field workflow. Background is in `
 ## Repeating groups, follow-up fields, quarter (built 2026-10-26, wd-partner-tasks PR #43)
 
 - [x] Merge PR #43 and release ext-wd 0.0.7 (tag `wd-v0.0.7`, 2026-10-26); the workflow uses it.
-- [ ] Add a test case for a repeating group or follow-up field. Needs its own mock-IO data (the mock-IO files are shared by all cases today).
-- [ ] Points map with a repeating group: species seen at one station share a spot, so only the top dot shows (the count is on hover).
+- [x] Test cases `wd-bird-point-count` (repeating group; real WD data, reporter names replaced) and `naibungalower-carcass-invented` (follow-up fields, by quarter), each with its own mock data in `mock-io/<case>/`.
+- [ ] Points map: values at one spot are spread around it (ext-wd PR #44). Release it as 0.0.8 and move the workflow to it.
 - [ ] Naibunga `sighting_details` (species) is also a repeating group; not tried yet.
 
 ## Example data
@@ -34,7 +34,7 @@ Open work for the Event Details - Categorical Field workflow. Background is in `
 ## Known issues
 
 - [ ] App-mode test (`app-sequential-mock-io`): `trends_main_widget` got a skipped title (`main_over_time_title` was skipped). `make test` only runs the CLI mode, so this isn't covered.
-- [ ] `test_iframes` screenshots for maps and some charts differ between runs.
+- [ ] `test_iframes` screenshots for maps and some charts differ between runs, and can hang on WebGL; `make test` leaves them out.
 - [ ] `test_otel_traces_success` fails locally, as it does in the incidents workflow (tracing setup).
 - [ ] Check in Ecoscope Desktop that unused per-field layout slots disappear and the widgets below move up. This is confirmed from the code (`WorkflowResultsGridLayout.tsx`), not yet seen in the app.
 
