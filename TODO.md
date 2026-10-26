@@ -20,7 +20,7 @@ Open work for the Event Details - Categorical Field workflow. Background is in `
 - [x] Merge PR #43 and release ext-wd 0.0.7 (tag `wd-v0.0.7`, 2026-10-26); the workflow uses it.
 - [x] Test cases `wd-bird-point-count` (repeating group; real WD data, reporter names replaced) and `naibungalower-carcass-invented` (follow-up fields, by quarter), each with its own mock data in `mock-io/<case>/`.
 - Points map: dots stay where they were recorded (PRD), even when different values share a spot (e.g. species at a bird station). Spreading them was tried (ext-wd #44) and reverted (#46); "One map per value" shows each value on its own.
-- [x] Naibunga `sighting_details` (ranger wildlife sightings, `Sighting Details: Species`): works, 2,048 rows from 1,971 events (2025–2026). About half the events have no rows, so Species is 48% blank: a data gap, shown as such. Found two fixes (ext-wd #47): inactive choices had no label ("elephant"), and group units like "vehicle(s)s"; release as 0.0.8.
+- [x] Naibunga `sighting_details` (ranger wildlife sightings, `Sighting Details: Species`): works, 2,048 rows from 1,971 events (2025–2026). About half the events have no rows, so Species is 48% blank: a data gap, shown as such. Group units like "vehicle(s)s" are fixed in ext-wd #47 (release as 0.0.8). Labels come from the form's active choices only, so a retired choice shows its stored code ("elephant", 157 records).
 
 ## Example data
 
