@@ -1,0 +1,761 @@
+id: event_details_categorical
+
+requirements:
+  - name: ecoscope-platform
+    version: ">=2.23.0,<3.0.0"
+    channel: https://repo.prefix.dev/ecoscope-workflows/
+
+  - name: ecoscope-workflows-ext-custom
+    version: "0.1.2"
+    channel: https://repo.prefix.dev/ecoscope-workflows-custom/
+
+  # ecoscope-platform already requires pydeck==0.9.2, which is only on conda-forge;
+  # pinned here so strict channel priority can resolve it (as in event-details).
+  - name: pydeck
+    version: 0.9.2
+    channel: conda-forge
+
+  # wd-partner-tasks: src/ecoscope-workflows-ext-wd (categorical tasks: _categorical.py).
+  - name: ecoscope-workflows-ext-wd
+    version: "0.0.6"
+    channel: https://repo.prefix.dev/ecoscope-workflows-custom/
+
+rjsf-overrides:
+  properties:
+    time_range.description: Choose the period. Events created in this period are included.
+
+    # Event type: a dropdown of the site's event types. The field names are typed for
+    # now: EarthRangerEnumResolver can't list categorical fields for this workflow yet
+    # (PLAN.md section 2). When it can, add a transform per field here.
+    fields.properties.event_type.ecoscope:transform:
+      - transformer: EarthRangerEnumResolver
+        transformer_kws:
+          type: event_type
+          depends_on: properties.er_client.properties.data_source.properties.name
+
+    groupers.properties.groupers.description: >-
+      Choose how to split the outputs into views, e.g. by year, reporter or area
+      (optional). Leave empty for one view of all events.
+    groupers.properties.groupers.ecoscope:transform:
+      - transformer: EarthRangerEnumResolver
+        transformer_kws:
+          type: spatial_feature_group
+          depends_on: properties.er_client.properties.data_source.properties.name
+
+    base_maps.properties.base_maps.description: >-
+      Select tile layers to use as base layers in map outputs. The first layer in the
+      list will be the bottommost layer displayed.
+
+  $defs:
+    ValueGrouper.properties.index_name.oneOf:
+      - const: reported_by_name
+        title: Reported By
+
+  uiSchema:
+    fields.cross_tabs.items:
+      ui:options:
+        orderable: false
+    groupers.groupers.items.anyOf:
+      - ui:options:
+          label: false
+      - ui:options:
+          label: false
+      - ui:options:
+          label: false
+    base_maps.base_maps.items.ui:options.label: false
+
+task-instance-defaults:
+  skipif:
+    conditions:
+      - any_is_empty_df
+      - any_dependency_skipped
+
+workflow:
+  - name: Workflow Details
+    id: workflow_details
+    task: set_workflow_details
+
+  - name: Data Source
+    id: er_client
+    task: set_er_connection
+
+  - name: Time Range
+    id: time_range
+    task: set_time_range
+    partial:
+      time_format: "%d %b %Y %H:%M:%S %Z"
+
+  - id: get_timezone
+    task: get_timezone_from_time_range
+    partial:
+      time_range: ${{ workflow.time_range.return }}
+
+  - name: Event Type and Fields
+    id: fields
+    task: set_categorical_fields
+
+  - name: Group by
+    id: groupers
+    task: set_groupers
+
+  - name: Base Maps
+    id: base_maps
+    task: set_base_maps
+
+  # ── data ──────────────────────────────────────────────────────────────────────
+
+  - id: catalogue
+    task: get_categorical_field_catalogue
+    partial:
+      client: ${{ workflow.er_client.return }}
+      fields: ${{ workflow.fields.return }}
+
+  - id: events
+    task: get_categorical_events
+    partial:
+      client: ${{ workflow.er_client.return }}
+      time_range: ${{ workflow.time_range.return }}
+      catalogue: ${{ workflow.catalogue.return }}
+
+  - id: events_local_time
+    task: convert_values_to_timezone
+    partial:
+      df: ${{ workflow.events.return }}
+      timezone: ${{ workflow.get_timezone.return }}
+      columns:
+        - time
+
+  - id: spatial_group_ids
+    task: extract_spatial_grouper_feature_group_names
+    partial:
+      groupers: ${{ workflow.groupers.return }}
+
+  - id: fetch_all_spatial_feature_groups
+    task: get_spatial_features_group
+    partial:
+      client: ${{ workflow.er_client.return }}
+    map:
+      argnames: spatial_features_group_name
+      argvalues: ${{ workflow.spatial_group_ids.return }}
+
+  - id: resolved_groupers
+    task: resolve_spatial_feature_groups_for_spatial_groupers
+    skipif:
+      conditions:
+        - never
+    partial:
+      groupers: ${{ workflow.groupers.return }}
+      spatial_feature_groups: ${{ workflow.fetch_all_spatial_feature_groups.return }}
+
+  - id: events_temporal_index
+    task: add_temporal_index
+    partial:
+      df: ${{ workflow.events_local_time.return }}
+      time_col: time
+      groupers: ${{ workflow.resolved_groupers.return }}
+      cast_to_datetime: true
+      format: mixed
+
+  - id: events_indexed
+    task: add_spatial_index
+    partial:
+      gdf: ${{ workflow.events_temporal_index.return }}
+      groupers: ${{ workflow.resolved_groupers.return }}
+
+  # ranking, colours and grid size come from the whole run, before grouping, so a value
+  # keeps its colour (and Other holds the same values) in every view
+  - id: ranking
+    task: rank_categorical_values
+    partial:
+      df: ${{ workflow.events_indexed.return }}
+      catalogue: ${{ workflow.catalogue.return }}
+
+  - id: events_split
+    task: split_groups
+    partial:
+      df: ${{ workflow.events_indexed.return }}
+      groupers: ${{ workflow.resolved_groupers.return }}
+
+  # ── 4 over time ───────────────────────────────────────────────────────────────
+  # (before the headline tiles, which use the trend period)
+
+  - title: Over Time
+    type: task-group
+    description: How the share of each value changes over time.
+    tasks:
+      - id: trend_period
+        task: set_categorical_trend_period
+
+      - id: main_over_time_title
+        task: categorical_widget_title
+        partial:
+          catalogue: ${{ workflow.catalogue.return }}
+          template: "{main} over time"
+
+      - id: trends_main
+        task: draw_categorical_trends
+        partial:
+            catalogue: ${{ workflow.catalogue.return }}
+            ranking: ${{ workflow.ranking.return }}
+            period: ${{ workflow.trend_period.return }}
+            which: main
+        mapvalues:
+          argnames: df
+          argvalues: ${{ workflow.events_split.return }}
+
+      - id: trends_main_html
+        task: persist_text
+        partial:
+          root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+          filename_suffix: main_field_over_time
+        mapvalues:
+          argnames: text
+          argvalues: ${{ workflow.trends_main.return }}
+
+      - id: trends_main_widget
+        task: create_plot_widget_single_view
+        skipif:
+          conditions:
+            - never
+        partial:
+          title: ${{ workflow.main_over_time_title.return }}
+        map:
+          argnames: [view, data]
+          argvalues: ${{ workflow.trends_main_html.return }}
+
+      - id: trends_main_merged
+        task: merge_widget_views
+        skipif:
+          conditions:
+            - never
+        partial:
+          widgets: ${{ workflow.trends_main_widget.return }}
+
+  # ── 6b grid maps ──────────────────────────────────────────────────────────────
+
+  - title: Grid Map
+    type: task-group
+    description: Where each value is concentrated, counted in grid squares.
+    tasks:
+      - id: grid
+        task: set_categorical_grid
+        partial:
+          df: ${{ workflow.events_indexed.return }}
+
+      - id: grid_maps
+        task: draw_categorical_grid_maps
+        partial:
+          catalogue: ${{ workflow.catalogue.return }}
+          ranking: ${{ workflow.ranking.return }}
+          cell_km: ${{ workflow.grid.return }}
+          tile_layers: ${{ workflow.base_maps.return }}
+        mapvalues:
+          argnames: df
+          argvalues: ${{ workflow.events_split.return }}
+
+      - id: grid_maps_html
+        task: persist_text
+        partial:
+          root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+          filename_suffix: grid_maps
+        mapvalues:
+          argnames: text
+          argvalues: ${{ workflow.grid_maps.return }}
+
+      - id: grid_maps_widget
+        task: create_map_widget_single_view
+        skipif:
+          conditions:
+            - never
+        partial:
+          title: Where each value is concentrated
+        map:
+          argnames: [view, data]
+          argvalues: ${{ workflow.grid_maps_html.return }}
+
+      - id: grid_maps_merged
+        task: merge_widget_views
+        skipif:
+          conditions:
+            - never
+        partial:
+          widgets: ${{ workflow.grid_maps_widget.return }}
+
+  # ── 1 headline tiles: one widget each, a number and a sparkline (as QENP) ─────────
+
+  - id: kpi_distinct_title
+    task: categorical_widget_title
+    partial:
+      catalogue: ${{ workflow.catalogue.return }}
+      template: "Distinct {main} values"
+
+  - id: kpi_unknown_title
+    task: categorical_widget_title
+    partial:
+      catalogue: ${{ workflow.catalogue.return }}
+      template: "{main}: % unknown or blank"
+
+  - id: kpi_events
+    task: draw_categorical_kpi
+    partial:
+      catalogue: ${{ workflow.catalogue.return }}
+      kpi: events
+      period: ${{ workflow.trend_period.return }}
+    mapvalues:
+      argnames: df
+      argvalues: ${{ workflow.events_split.return }}
+
+  - id: kpi_events_html
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: kpi_events
+    mapvalues:
+      argnames: text
+      argvalues: ${{ workflow.kpi_events.return }}
+
+  - id: kpi_events_widget
+    task: create_plot_widget_single_view
+    skipif:
+      conditions:
+        - never
+    partial:
+      title: Events
+    map:
+      argnames: [view, data]
+      argvalues: ${{ workflow.kpi_events_html.return }}
+
+  - id: kpi_events_merged
+    task: merge_widget_views
+    skipif:
+      conditions:
+        - never
+    partial:
+      widgets: ${{ workflow.kpi_events_widget.return }}
+
+  - id: kpi_distinct
+    task: draw_categorical_kpi
+    partial:
+      catalogue: ${{ workflow.catalogue.return }}
+      kpi: distinct
+      period: ${{ workflow.trend_period.return }}
+    mapvalues:
+      argnames: df
+      argvalues: ${{ workflow.events_split.return }}
+
+  - id: kpi_distinct_html
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: kpi_distinct
+    mapvalues:
+      argnames: text
+      argvalues: ${{ workflow.kpi_distinct.return }}
+
+  - id: kpi_distinct_widget
+    task: create_plot_widget_single_view
+    skipif:
+      conditions:
+        - never
+    partial:
+      title: ${{ workflow.kpi_distinct_title.return }}
+    map:
+      argnames: [view, data]
+      argvalues: ${{ workflow.kpi_distinct_html.return }}
+
+  - id: kpi_distinct_merged
+    task: merge_widget_views
+    skipif:
+      conditions:
+        - never
+    partial:
+      widgets: ${{ workflow.kpi_distinct_widget.return }}
+
+  - id: kpi_unknown
+    task: draw_categorical_kpi
+    partial:
+      catalogue: ${{ workflow.catalogue.return }}
+      kpi: unknown
+      period: ${{ workflow.trend_period.return }}
+    mapvalues:
+      argnames: df
+      argvalues: ${{ workflow.events_split.return }}
+
+  - id: kpi_unknown_html
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: kpi_unknown
+    mapvalues:
+      argnames: text
+      argvalues: ${{ workflow.kpi_unknown.return }}
+
+  - id: kpi_unknown_widget
+    task: create_plot_widget_single_view
+    skipif:
+      conditions:
+        - never
+    partial:
+      title: ${{ workflow.kpi_unknown_title.return }}
+    map:
+      argnames: [view, data]
+      argvalues: ${{ workflow.kpi_unknown_html.return }}
+
+  - id: kpi_unknown_merged
+    task: merge_widget_views
+    skipif:
+      conditions:
+        - never
+    partial:
+      widgets: ${{ workflow.kpi_unknown_widget.return }}
+
+  # ── 2 sunburst ────────────────────────────────────────────────────────────────
+
+  - id: sunburst
+    task: draw_categorical_sunburst
+    partial:
+      catalogue: ${{ workflow.catalogue.return }}
+      ranking: ${{ workflow.ranking.return }}
+    mapvalues:
+      argnames: df
+      argvalues: ${{ workflow.events_split.return }}
+
+  - id: sunburst_html
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: sunburst
+    mapvalues:
+      argnames: text
+      argvalues: ${{ workflow.sunburst.return }}
+
+  - id: sunburst_widget
+    task: create_plot_widget_single_view
+    skipif:
+      conditions:
+        - never
+    partial:
+      title: Breakdown
+    map:
+      argnames: [view, data]
+      argvalues: ${{ workflow.sunburst_html.return }}
+
+  - id: sunburst_merged
+    task: merge_widget_views
+    skipif:
+      conditions:
+        - never
+    partial:
+      widgets: ${{ workflow.sunburst_widget.return }}
+
+  # ── 3 bars: the main field, then each other field in its own widgets ───────────
+
+  - id: main_values_title
+    task: categorical_widget_title
+    partial:
+      catalogue: ${{ workflow.catalogue.return }}
+      template: "{main}"
+
+  - id: bars_main
+    task: draw_categorical_bars
+    partial:
+        catalogue: ${{ workflow.catalogue.return }}
+        ranking: ${{ workflow.ranking.return }}
+        which: main
+    mapvalues:
+      argnames: df
+      argvalues: ${{ workflow.events_split.return }}
+
+  - id: bars_main_html
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: main_field_values
+    mapvalues:
+      argnames: text
+      argvalues: ${{ workflow.bars_main.return }}
+
+  - id: bars_main_widget
+    task: create_plot_widget_single_view
+    skipif:
+      conditions:
+        - never
+    partial:
+      title: ${{ workflow.main_values_title.return }}
+    map:
+      argnames: [view, data]
+      argvalues: ${{ workflow.bars_main_html.return }}
+
+  - id: bars_main_merged
+    task: merge_widget_views
+    skipif:
+      conditions:
+        - never
+    partial:
+      widgets: ${{ workflow.bars_main_widget.return }}
+
+  # each other field: its own values and over-time widgets (one view per group); they go
+  # last in the widget list, so their number can follow the fields picked (layout.json
+  # has slots for 8, unused slots are dropped)
+  - id: field_widgets
+    task: draw_categorical_field_widgets
+    partial:
+      views: ${{ workflow.events_split.return }}
+      catalogue: ${{ workflow.catalogue.return }}
+      ranking: ${{ workflow.ranking.return }}
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      period: ${{ workflow.trend_period.return }}
+
+  # ── 5 cross-tabs ──────────────────────────────────────────────────────────────
+
+  - id: crosstabs
+    task: draw_categorical_crosstabs
+    partial:
+      catalogue: ${{ workflow.catalogue.return }}
+      ranking: ${{ workflow.ranking.return }}
+    mapvalues:
+      argnames: df
+      argvalues: ${{ workflow.events_split.return }}
+
+  - id: crosstabs_html
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: crosstabs
+    mapvalues:
+      argnames: text
+      argvalues: ${{ workflow.crosstabs.return }}
+
+  - id: crosstabs_widget
+    task: create_plot_widget_single_view
+    skipif:
+      conditions:
+        - never
+    partial:
+      title: Cross-tabs
+    map:
+      argnames: [view, data]
+      argvalues: ${{ workflow.crosstabs_html.return }}
+
+  - id: crosstabs_merged
+    task: merge_widget_views
+    skipif:
+      conditions:
+        - never
+    partial:
+      widgets: ${{ workflow.crosstabs_widget.return }}
+
+  # ── 6 maps ────────────────────────────────────────────────────────────────────
+
+  - id: points_map
+    task: draw_categorical_points_map
+    partial:
+      catalogue: ${{ workflow.catalogue.return }}
+      ranking: ${{ workflow.ranking.return }}
+      tile_layers: ${{ workflow.base_maps.return }}
+    mapvalues:
+      argnames: df
+      argvalues: ${{ workflow.events_split.return }}
+
+  - id: points_map_html
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: points_map
+    mapvalues:
+      argnames: text
+      argvalues: ${{ workflow.points_map.return }}
+
+  - id: points_map_widget
+    task: create_map_widget_single_view
+    skipif:
+      conditions:
+        - never
+    partial:
+      title: Where each value was recorded
+    map:
+      argnames: [view, data]
+      argvalues: ${{ workflow.points_map_html.return }}
+
+  - id: points_map_merged
+    task: merge_widget_views
+    skipif:
+      conditions:
+        - never
+    partial:
+      widgets: ${{ workflow.points_map_widget.return }}
+
+  - id: small_multiples
+    task: draw_categorical_small_multiples
+    partial:
+      catalogue: ${{ workflow.catalogue.return }}
+      ranking: ${{ workflow.ranking.return }}
+      tile_layers: ${{ workflow.base_maps.return }}
+    mapvalues:
+      argnames: df
+      argvalues: ${{ workflow.events_split.return }}
+
+  - id: small_multiples_html
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: small_multiples
+    mapvalues:
+      argnames: text
+      argvalues: ${{ workflow.small_multiples.return }}
+
+  - id: small_multiples_widget
+    task: create_map_widget_single_view
+    skipif:
+      conditions:
+        - never
+    partial:
+      title: One map per value
+    map:
+      argnames: [view, data]
+      argvalues: ${{ workflow.small_multiples_html.return }}
+
+  - id: small_multiples_merged
+    task: merge_widget_views
+    skipif:
+      conditions:
+        - never
+    partial:
+      widgets: ${{ workflow.small_multiples_widget.return }}
+
+  # ── 7 tables and files ────────────────────────────────────────────────────────
+
+  - id: summary_table
+    task: categorical_summary_table
+    partial:
+      catalogue: ${{ workflow.catalogue.return }}
+      cell_km: ${{ workflow.grid.return }}
+    mapvalues:
+      argnames: df
+      argvalues: ${{ workflow.events_split.return }}
+
+  - id: summary_table_drawn
+    task: draw_table
+    partial:
+      columns: null
+      table_config:
+        enable_sorting: true
+        enable_filtering: true
+        enable_download: true
+        hide_header: false
+      widget_id: Values table
+    mapvalues:
+      argnames: dataframe
+      argvalues: ${{ workflow.summary_table.return }}
+
+  - id: summary_table_html
+    task: persist_text
+    partial:
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+      filename_suffix: values_table
+    mapvalues:
+      argnames: text
+      argvalues: ${{ workflow.summary_table_drawn.return }}
+
+  - id: summary_table_widget
+    task: create_table_widget_single_view
+    skipif:
+      conditions:
+        - never
+    partial:
+      title: Values table
+    map:
+      argnames: [view, data]
+      argvalues: ${{ workflow.summary_table_html.return }}
+
+  - id: summary_table_merged
+    task: merge_widget_views
+    skipif:
+      conditions:
+        - never
+    partial:
+      widgets: ${{ workflow.summary_table_widget.return }}
+
+  - id: all_values_table
+    task: categorical_summary_table
+    partial:
+      df: ${{ workflow.events_indexed.return }}
+      catalogue: ${{ workflow.catalogue.return }}
+      cell_km: ${{ workflow.grid.return }}
+
+  - id: all_values_csv
+    task: persist_df
+    partial:
+      df: ${{ workflow.all_values_table.return }}
+      filetype: csv
+      filename: values_summary
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+
+  - id: events_table
+    task: categorical_events_table
+    partial:
+      df: ${{ workflow.events_indexed.return }}
+      catalogue: ${{ workflow.catalogue.return }}
+
+  - id: events_csv
+    task: persist_df
+    partial:
+      df: ${{ workflow.events_table.return }}
+      filetype: csv
+      filename: events
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+
+  - id: crosstab_table
+    task: categorical_crosstab_table
+    partial:
+      df: ${{ workflow.events_indexed.return }}
+      catalogue: ${{ workflow.catalogue.return }}
+      ranking: ${{ workflow.ranking.return }}
+
+  - id: crosstab_csv
+    task: persist_df
+    partial:
+      df: ${{ workflow.crosstab_table.return }}
+      filetype: csv
+      filename: crosstabs
+      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
+
+  - id: values_file
+    task: create_files_single_view
+    partial:
+      files: ${{ workflow.all_values_csv.return }}
+
+  - id: events_file
+    task: create_files_single_view
+    partial:
+      files: ${{ workflow.events_csv.return }}
+
+  - id: crosstab_file
+    task: create_files_single_view
+    partial:
+      files: ${{ workflow.crosstab_csv.return }}
+
+  - name: Dashboard
+    id: dashboard
+    task: gather_dashboard
+    partial:
+      details: ${{ workflow.workflow_details.return }}
+      widgets:
+        - ${{ workflow.kpi_events_merged.return }}
+        - ${{ workflow.kpi_distinct_merged.return }}
+        - ${{ workflow.kpi_unknown_merged.return }}
+        - ${{ workflow.bars_main_merged.return }}
+        - ${{ workflow.sunburst_merged.return }}
+        - ${{ workflow.trends_main_merged.return }}
+        - ${{ workflow.crosstabs_merged.return }}
+        - ${{ workflow.points_map_merged.return }}
+        - ${{ workflow.grid_maps_merged.return }}
+        - ${{ workflow.small_multiples_merged.return }}
+        - ${{ workflow.summary_table_merged.return }}
+        - ${{ workflow.field_widgets.return }}
+      groupers: ${{ workflow.resolved_groupers.return }}
+      time_range: ${{ workflow.time_range.return }}
+      files:
+        - ${{ workflow.values_file.return }}
+        - ${{ workflow.events_file.return }}
+        - ${{ workflow.crosstab_file.return }}

@@ -1,0 +1,94 @@
+naibungalower-post-report:
+  name: Naibunga Lower, post reports by month
+  description: >-
+    246 post reports (2025): pick-one fields, two pick-several fields, Water Status kept in
+    form order, a cross-tab, one view per month.
+  params:
+    workflow_details:
+      name: Post Report - Water Status
+      description: ""
+    er_client:
+      data_source:
+        name: naibungalower
+    time_range:
+      since: "2025-01-01T00:00:00.000Z"
+      until: "2026-10-15T00:00:00.000Z"
+      timezone: {label: "UTC+03:00", tzCode: Africa/Nairobi, name: Africa/Nairobi, utc: "+03:00"}
+    fields:
+      event_type: post_rep
+      main_field: Water Status
+      other_fields: [Post, Morning Call Up Conducted, Evening Call Up Conducted, Technical Issues, Watch Keeper Checklist]
+      cross_tabs:
+        - {rows: Post, columns: Water Status}
+      sunburst_fields: []
+      natural_order_fields: [Water Status]
+      show_full_list: false
+    groupers:
+      groupers:
+        - temporal_index: "%Y-%m"
+    base_maps: {}
+    trend_period: {period: auto}
+    grid: {}
+
+naibungalower-wildlife-sighting:
+  name: Naibunga Lower, wildlife sightings by reporter
+  description: >-
+    109 wildlife sightings (from late Sep 2026): 15 species, so Other and tied values
+    are used; one view per reporter.
+  params:
+    workflow_details:
+      name: Wildlife Sighting - Species
+      description: ""
+    er_client:
+      data_source:
+        name: naibungalower
+    time_range:
+      since: "2026-09-20T00:00:00.000Z"
+      until: "2026-10-15T00:00:00.000Z"
+      timezone: {label: "UTC+03:00", tzCode: Africa/Nairobi, name: Africa/Nairobi, utc: "+03:00"}
+    fields:
+      event_type: wildlife_sighting
+      main_field: Species
+      other_fields: [Sighting type]
+      cross_tabs:
+        - {rows: Species, columns: Sighting type}
+      sunburst_fields: []
+      natural_order_fields: []
+      show_full_list: false
+    groupers:
+      groupers:
+        - index_name: reported_by_name
+    base_maps: {}
+    trend_period: {period: auto}
+    grid: {}
+
+naibungalower-ranger-sightings:
+  name: Naibunga Lower, ranger wildlife sightings
+  description: >-
+    1,971 ranger sightings (2025-2026), 40% with no location answered; no grouping;
+    the summary grid option.
+  params:
+    workflow_details:
+      name: Ranger Wildlife Sightings - Location
+      description: ""
+    er_client:
+      data_source:
+        name: naibungalower
+    time_range:
+      since: "2025-01-01T00:00:00.000Z"
+      until: "2026-10-15T00:00:00.000Z"
+      timezone: {label: "UTC+03:00", tzCode: Africa/Nairobi, name: Africa/Nairobi, utc: "+03:00"}
+    fields:
+      event_type: wildlife_sighting_rep_ranger
+      main_field: Location
+      other_fields: [Conservancy, Actions Checklist]
+      cross_tabs:
+        - {rows: Location, columns: Conservancy}
+      sunburst_fields: []
+      natural_order_fields: []
+      show_full_list: false
+    groupers:
+      groupers: []
+    base_maps: {}
+    trend_period: {period: auto}
+    grid: {}

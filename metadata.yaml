@@ -1,0 +1,13 @@
+name: Event Details - Categorical Field Workflow
+author:
+  name: Zakariya
+  organization: Wildlife Dynamics
+  email: zakariya@wildlifedynamics.com
+description: >
+  The values recorded in an event type's dropdown questions (species, sex, cause of
+  death, ...): how often, when and where. Summary tiles, a breakdown sunburst, bar
+  charts per field, trends over time, cross-tabs, points / grid / small-multiple maps
+  and a values table with CSV downloads. One event type per run (v2 forms).
+theory: ""
+output_comment: ""
+citation: ""

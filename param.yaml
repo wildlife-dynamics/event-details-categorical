@@ -1,0 +1,32 @@
+workflow_details:
+  name: Elephant Sightings - Location
+  description: Naibunga Lower elephant sightings, by year
+
+er_client:
+  data_source:
+    name: naibungalower
+
+time_range:
+  since: "2018-01-01T00:00:00.000Z"
+  until: "2026-10-01T00:00:00.000Z"
+  timezone: {label: "UTC+03:00", tzCode: Africa/Nairobi, name: Africa/Nairobi, utc: "+03:00"}
+
+# Event type: picked from a dropdown. Fields: typed as they read on the form.
+fields:
+  event_type: elephant_sighting_rep
+  main_field: Location
+  other_fields: [Sighting, Conservancy]
+  cross_tabs:
+    - {rows: Location, columns: Sighting}
+  sunburst_fields: []
+  natural_order_fields: []
+  show_full_list: false
+
+groupers:
+  groupers:
+    - temporal_index: "%Y"
+
+base_maps: {}
+
+trend_period: {period: auto}
+grid: {}

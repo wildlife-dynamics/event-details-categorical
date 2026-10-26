@@ -1,0 +1,647 @@
+{
+  "properties": {
+    "workflow_details": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Workflow Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Workflow Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "description": "Add information that will help to differentiate this workflow from another.",
+      "title": "Workflow Details"
+    },
+    "er_client": {
+      "additionalProperties": false,
+      "properties": {
+        "data_source": {
+          "$ref": "#/$defs/EarthRangerConnection",
+          "title": "",
+          "description": "Select one of your configured data sources."
+        }
+      },
+      "required": [
+        "data_source"
+      ],
+      "type": "object",
+      "title": "Data Source"
+    },
+    "time_range": {
+      "additionalProperties": false,
+      "properties": {
+        "since": {
+          "format": "date-time",
+          "title": "Since",
+          "type": "string",
+          "description": "The start time"
+        },
+        "until": {
+          "format": "date-time",
+          "title": "Until",
+          "type": "string",
+          "description": "The end time"
+        },
+        "timezone": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/TimezoneInfo"
+            }
+          ],
+          "default": null,
+          "title": "Timezone"
+        }
+      },
+      "required": [
+        "since",
+        "until"
+      ],
+      "type": "object",
+      "description": "Choose the period. Events created in this period are included.",
+      "title": "Time Range"
+    },
+    "fields": {
+      "additionalProperties": false,
+      "properties": {
+        "event_type": {
+          "title": "Event Type",
+          "type": "string",
+          "description": "Select the event type to analyze.",
+          "ecoscope:transform": [
+            {
+              "transformer": "EarthRangerEnumResolver",
+              "transformer_kws": {
+                "type": "event_type",
+                "depends_on": "properties.er_client.properties.data_source.properties.name"
+              }
+            }
+          ]
+        },
+        "main_field": {
+          "title": "Main Field - Choice field to analyze",
+          "type": "string",
+          "description": "Select the choice field the workflow will summarize, e.g. Species. Each choice will be represented by a different color in the outputs. Type the field as it appears on the form; it must allow one choice per event."
+        },
+        "other_fields": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 8,
+          "title": "Other Fields - More choice fields to summarize",
+          "type": "array",
+          "description": "Add more choice fields to summarize, up to 8. Each field gets its own charts in the outputs."
+        },
+        "cross_tabs": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CrossTab"
+          },
+          "title": "Cross-tabs",
+          "type": "array",
+          "description": "Choose pairs of choice fields to compare in a table, e.g. rows Species, columns Cause of Death."
+        },
+        "sunburst_fields": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Sunburst Rings",
+          "type": "array",
+          "description": "Choose the choice fields for the rings of the breakdown chart, from the center out. Leave empty to use the main field and the first other field.",
+          "ecoscope:advanced": true
+        },
+        "natural_order_fields": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Keep Form Order",
+          "type": "array",
+          "description": "Choose choice fields whose choices have a natural order, e.g. age class. Their choices will be shown in form order instead of by count.",
+          "ecoscope:advanced": true
+        },
+        "show_full_list": {
+          "default": false,
+          "title": "Show Every Value",
+          "type": "boolean",
+          "description": "Show every choice in the outputs instead of the 10 most common plus Other.",
+          "ecoscope:advanced": true
+        }
+      },
+      "required": [
+        "event_type",
+        "main_field"
+      ],
+      "type": "object",
+      "title": "Event Type and Fields"
+    },
+    "groupers": {
+      "additionalProperties": false,
+      "properties": {
+        "groupers": {
+          "default": null,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ValueGrouper"
+              },
+              {
+                "$ref": "#/$defs/TemporalGrouper"
+              },
+              {
+                "$ref": "#/$defs/SpatialGrouper"
+              }
+            ],
+            "title": "Group by"
+          },
+          "title": " ",
+          "type": "array",
+          "description": "Choose how to split the outputs into views, e.g. by year, reporter or area (optional). Leave empty for one view of all events.",
+          "ecoscope:transform": [
+            {
+              "transformer": "EarthRangerEnumResolver",
+              "transformer_kws": {
+                "type": "spatial_feature_group",
+                "depends_on": "properties.er_client.properties.data_source.properties.name"
+              }
+            }
+          ]
+        }
+      },
+      "type": "object",
+      "required": [],
+      "title": "Group by"
+    },
+    "base_maps": {
+      "additionalProperties": false,
+      "properties": {
+        "base_maps": {
+          "default": [
+            {
+              "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+              "opacity": 1,
+              "max_zoom": 20,
+              "min_zoom": 0
+            },
+            {
+              "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+              "opacity": 0.5,
+              "max_zoom": 20,
+              "min_zoom": 0
+            }
+          ],
+          "items": {
+            "title": "Base Layer",
+            "anyOf": [
+              {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
+                "properties": {
+                  "url": {
+                    "default": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    "title": "Preset Layer URL",
+                    "type": "string",
+                    "const": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    "enum": [
+                      "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    ]
+                  },
+                  "opacity": {
+                    "default": 1,
+                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
+                    "ecoscope:advanced": true,
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "title": "Layer Opacity",
+                    "type": "number"
+                  }
+                },
+                "title": "Open Street Map",
+                "type": "object"
+              },
+              {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
+                "properties": {
+                  "url": {
+                    "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+                    "title": "Preset Layer URL",
+                    "type": "string",
+                    "const": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+                    "enum": [
+                      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+                    ]
+                  },
+                  "opacity": {
+                    "default": 1,
+                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
+                    "ecoscope:advanced": true,
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "title": "Layer Opacity",
+                    "type": "number"
+                  }
+                },
+                "title": "Roadmap",
+                "type": "object"
+              },
+              {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
+                "properties": {
+                  "url": {
+                    "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                    "title": "Preset Layer URL",
+                    "type": "string",
+                    "const": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                    "enum": [
+                      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                    ]
+                  },
+                  "opacity": {
+                    "default": 1,
+                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
+                    "ecoscope:advanced": true,
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "title": "Layer Opacity",
+                    "type": "number"
+                  }
+                },
+                "title": "Satellite",
+                "type": "object"
+              },
+              {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
+                "properties": {
+                  "url": {
+                    "default": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                    "title": "Preset Layer URL",
+                    "type": "string",
+                    "const": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                    "enum": [
+                      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
+                    ]
+                  },
+                  "opacity": {
+                    "default": 1,
+                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
+                    "ecoscope:advanced": true,
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "title": "Layer Opacity",
+                    "type": "number"
+                  }
+                },
+                "title": "Terrain",
+                "type": "object"
+              },
+              {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
+                "properties": {
+                  "url": {
+                    "default": "https://server.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",
+                    "title": "Preset Layer URL",
+                    "type": "string",
+                    "const": "https://server.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}",
+                    "enum": [
+                      "https://server.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}"
+                    ]
+                  },
+                  "opacity": {
+                    "default": 1,
+                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
+                    "ecoscope:advanced": true,
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "title": "Layer Opacity",
+                    "type": "number"
+                  }
+                },
+                "title": "USGS Hillshade",
+                "type": "object"
+              },
+              {
+                "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
+                "properties": {
+                  "url": {
+                    "default": "https://example.tiles.com/{z}/{x}/{y}.png",
+                    "description": "The URL of a publicly accessible tiled raster service.",
+                    "pattern": "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}([-a-zA-Z0-9()@:%_\\+.~#?&//=\\{\\}]*)",
+                    "title": "Custom Layer URL",
+                    "type": "string"
+                  },
+                  "opacity": {
+                    "default": 1,
+                    "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
+                    "ecoscope:advanced": true,
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "title": "Custom Layer Opacity",
+                    "type": "number"
+                  },
+                  "max_zoom": {
+                    "default": 20,
+                    "description": "Set the maximum zoom level to fetch tiles for.",
+                    "title": "Custom Layer Max Zoom",
+                    "type": "integer"
+                  },
+                  "min_zoom": {
+                    "default": 0,
+                    "description": "Set the minimum zoom level to fetch tiles for.",
+                    "title": "Custom Layer Min Zoom",
+                    "type": "integer"
+                  }
+                },
+                "title": "Custom Layer (Advanced)",
+                "type": "object"
+              }
+            ]
+          },
+          "title": " ",
+          "type": "array",
+          "description": "Select tile layers to use as base layers in map outputs. The first layer in the list will be the bottommost layer displayed.",
+          "ecoscope:advanced": true
+        }
+      },
+      "type": "object",
+      "required": [],
+      "title": "Base Maps"
+    },
+    "Over Time": {
+      "type": "object",
+      "description": "How the share of each value changes over time.",
+      "ecoscope:task_group": true,
+      "properties": {
+        "trend_period": {
+          "additionalProperties": false,
+          "properties": {
+            "period": {
+              "default": "auto",
+              "enum": [
+                "auto",
+                "week",
+                "month",
+                "quarter",
+                "year"
+              ],
+              "title": "Time Period",
+              "type": "string",
+              "description": "Choose the time interval for the charts over time. Auto picks one based on the time range.",
+              "ecoscope:advanced": true
+            }
+          },
+          "type": "object",
+          "required": [],
+          "title": ""
+        }
+      }
+    },
+    "Grid Map": {
+      "type": "object",
+      "description": "Where each value is concentrated, counted in grid squares.",
+      "ecoscope:task_group": true,
+      "properties": {
+        "grid": {
+          "additionalProperties": false,
+          "properties": {
+            "cell_size_km": {
+              "default": null,
+              "title": "Grid Square Size (km)",
+              "type": "number",
+              "description": "Set the size of the grid squares in km (optional). Leave empty to fit the squares to the area of the events.",
+              "ecoscope:advanced": true
+            }
+          },
+          "required": [],
+          "type": "object",
+          "title": ""
+        }
+      }
+    }
+  },
+  "$defs": {
+    "EarthRangerConnection": {
+      "properties": {
+        "name": {
+          "title": "Data Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "EarthRangerConnection",
+      "type": "object"
+    },
+    "TimezoneInfo": {
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "tzCode": {
+          "title": "Tzcode",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "utc": {
+          "title": "Utc",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "tzCode",
+        "name",
+        "utc"
+      ],
+      "title": "TimezoneInfo",
+      "type": "object"
+    },
+    "CrossTab": {
+      "properties": {
+        "rows": {
+          "description": "The choice field shown down the side of the table.",
+          "title": "Rows",
+          "type": "string"
+        },
+        "columns": {
+          "description": "The choice field shown across the top of the table.",
+          "title": "Columns",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rows",
+        "columns"
+      ],
+      "title": "Pair",
+      "type": "object"
+    },
+    "SpatialGrouper": {
+      "properties": {
+        "spatial_index_name": {
+          "title": "Spatial Regions",
+          "type": "string"
+        }
+      },
+      "required": [
+        "spatial_index_name"
+      ],
+      "title": "Spatial",
+      "type": "object"
+    },
+    "TemporalGrouper": {
+      "properties": {
+        "temporal_index": {
+          "oneOf": [
+            {
+              "const": "%Y",
+              "title": "Year (example: 2024)"
+            },
+            {
+              "const": "%B",
+              "title": "Month (example: September)"
+            },
+            {
+              "const": "%Y-%m",
+              "title": "Year and Month (example: 2023-01)"
+            },
+            {
+              "const": "%j",
+              "title": "Day of the year as a number (example: 365)"
+            },
+            {
+              "const": "%d",
+              "title": "Day of the month as a number (example: 31)"
+            },
+            {
+              "const": "%A",
+              "title": "Day of the week (example: Sunday)"
+            },
+            {
+              "const": "%H",
+              "title": "Hour (24-hour clock) as number (example: 22)"
+            },
+            {
+              "const": "%Y-%m-%d",
+              "title": "Date (example: 2025-01-31)"
+            }
+          ],
+          "title": "Time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "temporal_index"
+      ],
+      "title": "Time",
+      "type": "object"
+    },
+    "ValueGrouper": {
+      "properties": {
+        "index_name": {
+          "title": "Category",
+          "type": "string",
+          "oneOf": [
+            {
+              "const": "reported_by_name",
+              "title": "Reported By"
+            }
+          ]
+        }
+      },
+      "required": [
+        "index_name"
+      ],
+      "title": "Category",
+      "type": "object"
+    }
+  },
+  "uiSchema": {
+    "workflow_details": {
+      "ui:order": [
+        "name",
+        "description"
+      ]
+    },
+    "time_range": {
+      "ui:order": [
+        "since",
+        "until",
+        "timezone"
+      ]
+    },
+    "fields": {
+      "ui:order": [
+        "event_type",
+        "main_field",
+        "other_fields",
+        "cross_tabs",
+        "sunburst_fields",
+        "natural_order_fields",
+        "show_full_list"
+      ],
+      "cross_tabs": {
+        "items": {
+          "ui:options": {
+            "orderable": false
+          }
+        }
+      }
+    },
+    "ui:order": [
+      "workflow_details",
+      "er_client",
+      "time_range",
+      "fields",
+      "groupers",
+      "base_maps",
+      "Over Time",
+      "Grid Map"
+    ],
+    "groupers": {
+      "groupers": {
+        "items": {
+          "anyOf": [
+            {
+              "ui:options": {
+                "label": false
+              }
+            },
+            {
+              "ui:options": {
+                "label": false
+              }
+            },
+            {
+              "ui:options": {
+                "label": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    "base_maps": {
+      "base_maps": {
+        "items": {
+          "ui:options": {
+            "label": false
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
