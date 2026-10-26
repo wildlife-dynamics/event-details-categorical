@@ -15,13 +15,17 @@ One event type per run, **v2 forms only**. Categorical means a dropdown on the f
 | | **Main Field** - Choice field to analyze | always, required | Drives the summary tiles, main charts and map colours. Must allow one choice per event |
 | | **Other Fields** - More choice fields to summarize | always | Up to 8; each gets its own widgets |
 | | **Cross-tabs** | always | Pairs of fields (rows × columns) |
-| | Sunburst Rings | advanced | Rings from the center out; **empty = the main field, then the first other field that allows one choice per event** |
+| | Sunburst Rings | advanced | Rings from the center out; **empty = the main field, then its follow-up fields (one shared ring), or else the first other field that allows one choice per event** |
 | | Keep Form Order | advanced | Fields whose choices keep the form's order instead of count order (age class, tank level) |
 | | Show Every Value | advanced | Bars, cross-tabs and charts over time list every value instead of top 10 (8 over time) + Other; values past the 8 colours are grey |
-| Group by | Time / Reported By / area | always | Optional: one dashboard view per group |
+| Group by | Time / Reported By / Quarter / area | always | Optional: one dashboard view per group. Quarter ("2026 Q1") comes from `add_categorical_quarter`; the platform's time grouper has none |
 | Base Maps | | advanced | Standard ecoscope base maps |
 | Over Time | Time Period | advanced | Auto (weekly ≤ 2 months, monthly ≤ 3 years, else quarterly), or fixed |
 | Grid Map | Grid Square Size (km) | advanced | Auto: about 25 squares across the events |
+
+**Follow-up fields** (an answer opens a question, e.g. Type of Death "Poached" opens Cause of Death (POACHED)) are typed like any other field. They count only the events where they were asked ("34 of 260 events · asked when Type of Death is Poached"). Follow-ups of one parent share one sunburst ring.
+
+**Repeating groups** (a list of rows in one event, e.g. Bird Point Count's Detection rows): type `Detection: Species`, or just `Species`. Using a group field makes each row a record, so the dashboard counts detections, not events. Fields from two groups can't be mixed.
 
 Fields are **typed as they read on the form** ("Water Status"); the field key (`water_status`) also works, and case, spaces and underscores don't matter. A name that isn't a dropdown on the form stops the run with a message listing the form's dropdown fields. They become dropdowns once EarthRangerEnumResolver can list categorical fields for this workflow (see `PLAN.md` §2-3).
 
@@ -48,7 +52,7 @@ A value keeps its colour, and "Other" holds the same values, in every view: rank
 
 ## Develop
 
-Tasks: `ecoscope-workflows-ext-wd` 0.0.6 on prefix.dev (wd-partner-tasks, checked out at `../wd-partner-tasks-categorical`): `tasks/_categorical.py`, tests in `tests/tasks/test_categorical.py`.
+Tasks: `ecoscope-workflows-ext-wd` 0.0.7 on prefix.dev (wd-partner-tasks, checked out at `../wd-partner-tasks-categorical`): `tasks/_categorical.py`, tests in `tests/tasks/test_categorical.py`.
 
 ```console
 make build     # build unreleased ext-wd into /tmp/ecoscope-workflows-custom/categorical/artifacts

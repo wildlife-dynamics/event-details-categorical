@@ -15,14 +15,12 @@ Open work for the Event Details - Categorical Field workflow. Background is in `
 - [ ] Rewrite the field descriptions in plain words (proposed wording is in the chat of 2026-10-22).
 - [ ] Field dropdowns instead of typed names, once Alex's ecoscope-server change lets EarthRangerEnumResolver list categorical fields (`PLAN.md` §3, phase 2).
 
-## Repeating groups (e.g. WD Bird Point Count)
+## Repeating groups, follow-up fields, quarter (built 2026-10-26, wd-partner-tasks PR #43)
 
-- [ ] Support questions inside a repeating group. On WD `bird_point_count`, **Detection** is a list of rows (one per bird) holding Species, Distance band, Time interval, Detection type, Flyover and Inside corridor (all dropdowns), plus Count and Other species.
-  - One detection = one record, so "Species" counts detections, and cross-tabs like Species × Distance band work.
-  - Field names like `Detection: Species`.
-  - Also covers naibungalower `sighting_details` (species).
-  - About a day plus tests.
-- [ ] Until then, Bird Point Count only works on the survey fields: Station, Round, Cloud Cover, Wind (Beaufort) and Rain. Only 11 counts so far (1-21 Oct 2026).
+- [x] Merge PR #43 and release ext-wd 0.0.7 (tag `wd-v0.0.7`, 2026-10-26); the workflow uses it.
+- [ ] Add a test case for a repeating group or follow-up field. Needs its own mock-IO data (the mock-IO files are shared by all cases today).
+- [ ] Points map with a repeating group: species seen at one station share a spot, so only the top dot shows (the count is on hover).
+- [ ] Naibunga `sighting_details` (species) is also a repeating group; not tried yet.
 
 ## Example data
 
@@ -42,8 +40,7 @@ Open work for the Event Details - Categorical Field workflow. Background is in `
 
 ## Against the PRD (not done)
 
-- [ ] Group by quarter. The platform's time grouper has no quarter.
 - [ ] Summary grid labels show only "%". The PRD's "56%, n=16" is shown on hover.
-- [ ] Parent and child fields (e.g. cause of death after "Poached") are untested, because no test site has one.
-- [ ] Personal fields: only reporter names are left out of the events CSV.
+- [ ] Follow-up fields are tested on invented data on Naibunga's real Animal Carcass form (4 real carcasses so far).
+- Personal fields: only the selected choice fields are read (no notes or free text), and reporter names are left out of the events CSV.
 - [ ] PRD "potential additions": encounter rates, seasonality, completeness by field, change between two periods, distinct subjects, report document.

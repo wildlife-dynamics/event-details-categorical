@@ -557,6 +557,10 @@
             {
               "const": "reported_by_name",
               "title": "Reported By"
+            },
+            {
+              "const": "quarter",
+              "title": "Quarter"
             }
           ]
         }

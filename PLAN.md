@@ -240,7 +240,12 @@ Not built yet: fields inside repeating groups, more than one grouper at a time, 
 - **Desktop look (2026-10-22):** checked against ecoscope-desktop (`WorkflowResults.tsx`): the dashboard is the right 4/5 of the page, so tiles are narrower than a full-width preview; `dev/preview_dashboard.py` now draws that page. Single-chart widgets fill their tile; long answers are shortened in bar labels and legends (full text on hover). No question lines in the widgets (as in the incidents workflow): a widget is its title and chart.
 - **Headline tiles (2026-10-22):** the custom Summary widget (three mini-cards and a footnote in one tile) didn't fit its box. It is now three widgets, one number and sparkline each, filling their tile like QENP's `draw_sparkline_kpi` (`draw_categorical_kpi`, kpi = events / distinct / unknown). The footnote (events without a location, trend period, grid size) is gone.
 - **Field settings (2026-10-26):** a one-list "Fields" form was tried (2026-10-25) and reverted. The form keeps Main Field, Other Fields, Cross-tabs, Sunburst Rings and Keep Form Order, with two changes: **Sunburst Rings left empty is automatic** (the main field, then the first other field that allows one choice per event), and blank entries are ignored. Titles and descriptions follow the platform's own wording (ecoscope-platform `_earthranger.py`: "choice field", "Select…", "Choose…"), e.g. "Main Field - Choice field to analyze".
-- **Still open against the PRD:** group by quarter (the platform has none); summary grid labels show "%" only, with n on hover; parent and child fields untested (no test site has one); personal fields beyond reporter names.
+- **PRD gaps closed (2026-10-26, ext-wd PR #43):**
+  - *Follow-up fields:* v2 forms keep them in `allOf → if/then`, so they weren't found by name. Now each is linked to its parent and the answers that open it. Records where it wasn't asked are "(not asked)" and left out of its outputs, and shares are out of the records where it was asked. Follow-ups of one parent share a sunburst ring, set automatically when Sunburst Rings is empty. Demo: invented data on Naibunga's real Animal Carcass form.
+  - *Repeating groups:* fields "Detection: Species" make each group row a record ("detections"); event fields repeat per row; two groups can't be mixed. Demo: WD Bird Point Count, 317 detections from 21 counts.
+  - *Group by Quarter:* a "quarter" column (`add_categorical_quarter`) used as a value grouper.
+  - "Unknown - please describe in notes" counts as Unknown.
+- **Still open against the PRD:** summary grid labels show "%" only, with n on hover.
 
 Not done yet: a release repo, and field dropdowns once ecoscope-server supports them (§3 phase 2).
 
