@@ -19,7 +19,7 @@ Open work for the Event Details - Categorical Field workflow. Background is in `
 
 - [x] Merge PR #43 and release ext-wd 0.0.7 (tag `wd-v0.0.7`, 2026-10-26); the workflow uses it.
 - [x] Test cases `wd-bird-point-count` (repeating group; real WD data, reporter names replaced) and `naibungalower-carcass-invented` (follow-up fields, by quarter), each with its own mock data in `mock-io/<case>/`.
-- [ ] Points map: values at one spot are spread around it (ext-wd PR #44). Release it as 0.0.8 and move the workflow to it.
+- Points map: dots stay where they were recorded (PRD), even when different values share a spot (e.g. species at a bird station). Spreading them was tried (ext-wd #44) and reverted (#46); "One map per value" shows each value on its own.
 - [ ] Naibunga `sighting_details` (species) is also a repeating group; not tried yet.
 
 ## Example data
