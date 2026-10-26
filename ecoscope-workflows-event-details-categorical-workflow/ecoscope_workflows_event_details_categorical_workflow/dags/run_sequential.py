@@ -52,6 +52,9 @@ from ecoscope.platform.tasks.transformation import (
     resolve_spatial_feature_groups_for_spatial_groupers as resolve_spatial_feature_groups_for_spatial_groupers,
 )
 from ecoscope_workflows_ext_wd.tasks import (
+    add_categorical_quarter as add_categorical_quarter,
+)
+from ecoscope_workflows_ext_wd.tasks import (
     categorical_crosstab_table as categorical_crosstab_table,
 )
 from ecoscope_workflows_ext_wd.tasks import (
@@ -294,6 +297,23 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    events_quarter = (
+        task(add_categorical_quarter)
+        .validate()
+        .set_task_instance_id("events_quarter")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(df=events_local_time, **(params.get("events_quarter") or {}))
+        .call()
+    )
+
     spatial_group_ids = (
         task(extract_spatial_grouper_feature_group_names)
         .validate()
@@ -364,7 +384,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=events_local_time,
+            df=events_quarter,
             time_col="time",
             groupers=resolved_groupers,
             cast_to_datetime=True,
@@ -645,6 +665,27 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
+    kpi_events_title = (
+        task(categorical_widget_title)
+        .validate()
+        .set_task_instance_id("kpi_events_title")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            catalogue=catalogue,
+            template="{Unit}",
+            **(params.get("kpi_events_title") or {}),
+        )
+        .call()
+    )
+
     kpi_distinct_title = (
         task(categorical_widget_title)
         .validate()
@@ -742,7 +783,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             ],
             unpack_depth=1,
         )
-        .partial(title="Events", **(params.get("kpi_events_widget") or {}))
+        .partial(title=kpi_events_title, **(params.get("kpi_events_widget") or {}))
         .map(argnames=["view", "data"], argvalues=kpi_events_html)
     )
 

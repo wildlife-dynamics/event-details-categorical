@@ -92,3 +92,69 @@ naibungalower-ranger-sightings:
     base_maps: {}
     trend_period: {period: auto}
     grid: {}
+
+wd-bird-point-count:
+  name: WD bird point counts, one record per detection
+  description: >-
+    Repeating group (own mock data in mock-io/wd-bird-point-count/: real WD counts, reporter
+    names replaced): 162 detections from 11 counts, main field Detection: Species, group
+    fields in form order, an event-level field (Station), a cross-tab inside the group.
+  params:
+    workflow_details:
+      name: Bird Point Counts - Species
+      description: ""
+    er_client:
+      data_source:
+        name: wd
+    time_range:
+      since: "2026-09-01T00:00:00.000Z"
+      until: "2026-10-22T00:00:00.000Z"
+      timezone: {label: "UTC+03:00", tzCode: Africa/Nairobi, name: Africa/Nairobi, utc: "+03:00"}
+    fields:
+      event_type: bird_point_count
+      main_field: "Detection: Species"
+      other_fields: ["Detection: Distance band", "Detection: Time interval", "Detection: Detection type", Station]
+      cross_tabs:
+        - {rows: "Detection: Species", columns: "Detection: Distance band"}
+      sunburst_fields: []
+      natural_order_fields: ["Detection: Distance band", "Detection: Time interval"]
+      show_full_list: false
+    groupers:
+      groupers: []
+    base_maps: {}
+    trend_period: {period: auto}
+    grid: {}
+
+naibungalower-carcass-invented:
+  name: Invented carcasses on Naibunga Lower's Animal Carcass form, by quarter
+  description: >-
+    Follow-up fields (own mock data in mock-io/naibungalower-carcass-invented/: the real form,
+    260 invented events): Type of Death opens Cause of Death (POACHED / NATURAL / CONFLICT /
+    PAC), which share one sunburst ring; "Unknown - please describe in notes"; a pick-several
+    field; one view per quarter.
+  params:
+    workflow_details:
+      name: Carcasses - Type of Death
+      description: ""
+    er_client:
+      data_source:
+        name: naibungalower
+    time_range:
+      since: "2024-01-01T00:00:00.000Z"
+      until: "2026-01-01T00:00:00.000Z"
+      timezone: {label: "UTC+03:00", tzCode: Africa/Nairobi, name: Africa/Nairobi, utc: "+03:00"}
+    fields:
+      event_type: animal_carcass
+      main_field: Type of death
+      other_fields: ["Cause of Death (POACHED)", "Cause of Death (NATURAL)", "Cause of Death (CONFLICT)", "Cause of Death (PAC)", Species, Action taken]
+      cross_tabs:
+        - {rows: Species, columns: Type of death}
+      sunburst_fields: []
+      natural_order_fields: []
+      show_full_list: false
+    groupers:
+      groupers:
+        - index_name: quarter
+    base_maps: {}
+    trend_period: {period: auto}
+    grid: {}

@@ -15,14 +15,12 @@ Open work for the Event Details - Categorical Field workflow. Background is in `
 - [ ] Rewrite the field descriptions in plain words (proposed wording is in the chat of 2026-10-22).
 - [ ] Field dropdowns instead of typed names, once Alex's ecoscope-server change lets EarthRangerEnumResolver list categorical fields (`PLAN.md` §3, phase 2).
 
-## Repeating groups (e.g. WD Bird Point Count)
+## Repeating groups, follow-up fields, quarter (built 2026-10-26, wd-partner-tasks PR #43)
 
-- [ ] Support questions inside a repeating group. On WD `bird_point_count`, **Detection** is a list of rows (one per bird) holding Species, Distance band, Time interval, Detection type, Flyover and Inside corridor (all dropdowns), plus Count and Other species.
-  - One detection = one record, so "Species" counts detections, and cross-tabs like Species × Distance band work.
-  - Field names like `Detection: Species`.
-  - Also covers naibungalower `sighting_details` (species).
-  - About a day plus tests.
-- [ ] Until then, Bird Point Count only works on the survey fields: Station, Round, Cloud Cover, Wind (Beaufort) and Rain. Only 11 counts so far (1-21 Oct 2026).
+- [x] Merge PR #43 and release ext-wd 0.0.7 (tag `wd-v0.0.7`, 2026-10-26); the workflow uses it.
+- [x] Test cases `wd-bird-point-count` (repeating group; real WD data, reporter names replaced) and `naibungalower-carcass-invented` (follow-up fields, by quarter), each with its own mock data in `mock-io/<case>/`.
+- [ ] Points map: values at one spot are spread around it (ext-wd PR #44). Release it as 0.0.8 and move the workflow to it.
+- [ ] Naibunga `sighting_details` (species) is also a repeating group; not tried yet.
 
 ## Example data
 
@@ -36,14 +34,13 @@ Open work for the Event Details - Categorical Field workflow. Background is in `
 ## Known issues
 
 - [ ] App-mode test (`app-sequential-mock-io`): `trends_main_widget` got a skipped title (`main_over_time_title` was skipped). `make test` only runs the CLI mode, so this isn't covered.
-- [ ] `test_iframes` screenshots for maps and some charts differ between runs.
+- [ ] `test_iframes` screenshots for maps and some charts differ between runs, and can hang on WebGL; `make test` leaves them out.
 - [ ] `test_otel_traces_success` fails locally, as it does in the incidents workflow (tracing setup).
 - [ ] Check in Ecoscope Desktop that unused per-field layout slots disappear and the widgets below move up. This is confirmed from the code (`WorkflowResultsGridLayout.tsx`), not yet seen in the app.
 
 ## Against the PRD (not done)
 
-- [ ] Group by quarter. The platform's time grouper has no quarter.
 - [ ] Summary grid labels show only "%". The PRD's "56%, n=16" is shown on hover.
-- [ ] Parent and child fields (e.g. cause of death after "Poached") are untested, because no test site has one.
-- [ ] Personal fields: only reporter names are left out of the events CSV.
+- [ ] Follow-up fields are tested on invented data on Naibunga's real Animal Carcass form (4 real carcasses so far).
+- Personal fields: only the selected choice fields are read (no notes or free text), and reporter names are left out of the events CSV.
 - [ ] PRD "potential additions": encounter rates, seasonality, completeness by field, change between two periods, distinct subjects, report document.

@@ -17,7 +17,7 @@ requirements:
 
   # wd-partner-tasks: src/ecoscope-workflows-ext-wd (categorical tasks: _categorical.py).
   - name: ecoscope-workflows-ext-wd
-    version: "0.0.6"
+    version: "0.0.7"
     channel: https://repo.prefix.dev/ecoscope-workflows-custom/
 
 rjsf-overrides:
@@ -50,6 +50,9 @@ rjsf-overrides:
     ValueGrouper.properties.index_name.oneOf:
       - const: reported_by_name
         title: Reported By
+      # from add_categorical_quarter: the platform's time grouper has no quarter
+      - const: quarter
+        title: Quarter
 
   uiSchema:
     fields.cross_tabs.items:
@@ -125,6 +128,11 @@ workflow:
       columns:
         - time
 
+  - id: events_quarter
+    task: add_categorical_quarter
+    partial:
+      df: ${{ workflow.events_local_time.return }}
+
   - id: spatial_group_ids
     task: extract_spatial_grouper_feature_group_names
     partial:
@@ -150,7 +158,7 @@ workflow:
   - id: events_temporal_index
     task: add_temporal_index
     partial:
-      df: ${{ workflow.events_local_time.return }}
+      df: ${{ workflow.events_quarter.return }}
       time_col: time
       groupers: ${{ workflow.resolved_groupers.return }}
       cast_to_datetime: true
@@ -283,6 +291,12 @@ workflow:
 
   # ── 1 headline tiles: one widget each, a number and a sparkline (as QENP) ─────────
 
+  - id: kpi_events_title
+    task: categorical_widget_title
+    partial:
+      catalogue: ${{ workflow.catalogue.return }}
+      template: "{Unit}"  # Events, or a repeating group's rows (Detections)
+
   - id: kpi_distinct_title
     task: categorical_widget_title
     partial:
@@ -320,7 +334,7 @@ workflow:
       conditions:
         - never
     partial:
-      title: Events
+      title: ${{ workflow.kpi_events_title.return }}
     map:
       argnames: [view, data]
       argvalues: ${{ workflow.kpi_events_html.return }}
