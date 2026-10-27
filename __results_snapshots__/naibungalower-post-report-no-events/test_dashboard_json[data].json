@@ -1,0 +1,104 @@
+{
+  "error": null,
+  "result": {
+    "filters": {
+      "schema": {
+        "properties": {},
+        "type": "object",
+        "uiSchema": {}
+      }
+    },
+    "layout": [],
+    "metadata": {
+      "description": "",
+      "time_range": "From 01 Jan 2030 00:00:00 UTC to 01 Feb 2030 00:00:00 UTC",
+      "time_zone": "UTC+03:00",
+      "title": "Post Report - no events"
+    },
+    "views": {
+      "{}": {
+        "dashboard": [
+          {
+            "data": null,
+            "id": 0,
+            "is_filtered": false,
+            "title": "Events",
+            "widget_type": "graph"
+          },
+          {
+            "data": null,
+            "id": 1,
+            "is_filtered": false,
+            "title": "Distinct Water Status values",
+            "widget_type": "graph"
+          },
+          {
+            "data": null,
+            "id": 2,
+            "is_filtered": false,
+            "title": "Water Status: % unknown or blank",
+            "widget_type": "graph"
+          },
+          {
+            "data": null,
+            "id": 3,
+            "is_filtered": false,
+            "title": "Water Status",
+            "widget_type": "graph"
+          },
+          {
+            "data": null,
+            "id": 4,
+            "is_filtered": false,
+            "title": "Breakdown",
+            "widget_type": "graph"
+          },
+          {
+            "data": null,
+            "id": 5,
+            "is_filtered": false,
+            "title": "Water Status over time",
+            "widget_type": "graph"
+          },
+          {
+            "data": null,
+            "id": 6,
+            "is_filtered": false,
+            "title": "Cross-tabs",
+            "widget_type": "graph"
+          },
+          {
+            "data": null,
+            "id": 7,
+            "is_filtered": false,
+            "title": "Where each value was recorded",
+            "widget_type": "map"
+          },
+          {
+            "data": null,
+            "id": 8,
+            "is_filtered": false,
+            "title": "Where each value is concentrated",
+            "widget_type": "map"
+          },
+          {
+            "data": null,
+            "id": 9,
+            "is_filtered": false,
+            "title": "One map per value",
+            "widget_type": "map"
+          },
+          {
+            "data": null,
+            "id": 10,
+            "is_filtered": false,
+            "title": "Values table",
+            "widget_type": "table"
+          }
+        ],
+        "files": []
+      }
+    }
+  },
+  "trace": null
+}

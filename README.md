@@ -52,7 +52,7 @@ A value keeps its colour, and "Other" holds the same values, in every view: rank
 
 ## Develop
 
-Tasks: `ecoscope-workflows-ext-wd` 0.0.8 on prefix.dev (wd-partner-tasks, checked out at `../wd-partner-tasks-categorical`): `tasks/_categorical.py`, tests in `tests/tasks/test_categorical.py`.
+Tasks: `ecoscope-workflows-ext-wd` 0.0.10 on prefix.dev (wd-partner-tasks, checked out at `../wd-partner-tasks-categorical`): `tasks/_categorical.py`, tests in `tests/tasks/test_categorical.py`.
 
 ```console
 make build     # build unreleased ext-wd into /tmp/ecoscope-workflows-custom/categorical/artifacts

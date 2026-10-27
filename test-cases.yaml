@@ -189,3 +189,36 @@ naibungalower-post-report-main-only:
     base_maps: {}
     trend_period: {period: auto}
     grid: {}
+
+naibungalower-post-report-no-events:
+  name: Naibunga Lower post reports, a period with no events
+  description: >-
+    The real Post Report form with no events (own mock data in
+    mock-io/naibungalower-post-report-no-events/: the form, and an empty events table, as
+    EarthRanger returns for an empty period). The run must finish with every widget
+    showing no data, not fail.
+  params:
+    workflow_details:
+      name: Post Report - no events
+      description: ""
+    er_client:
+      data_source:
+        name: naibungalower
+    time_range:
+      since: "2030-01-01T00:00:00.000Z"
+      until: "2030-02-01T00:00:00.000Z"
+      timezone: {label: "UTC+03:00", tzCode: Africa/Nairobi, name: Africa/Nairobi, utc: "+03:00"}
+    fields:
+      event_type: post_rep
+      main_field: Water Status
+      other_fields: [Post, Technical Issues]
+      cross_tabs:
+        - {rows: Post, columns: Water Status}
+      sunburst_fields: []
+      natural_order_fields: [Water Status]
+      show_full_list: false
+    groupers:
+      groupers: []
+    base_maps: {}
+    trend_period: {period: auto}
+    grid: {}
