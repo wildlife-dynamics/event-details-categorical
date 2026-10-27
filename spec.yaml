@@ -728,6 +728,11 @@ workflow:
 
   - id: crosstab_csv
     task: persist_df
+    # no cross-tabs chosen: save the empty table (headers only) rather than skip, since a
+    # skipped file would skip the whole dashboard; still skipped when there are no events
+    skipif:
+      conditions:
+        - any_dependency_skipped
     partial:
       df: ${{ workflow.crosstab_table.return }}
       filetype: csv
