@@ -56,6 +56,8 @@ Tasks: `ecoscope-workflows-ext-wd` 0.0.8 on prefix.dev (wd-partner-tasks, checke
 
 ```console
 make build     # build unreleased ext-wd into /tmp/ecoscope-workflows-custom/categorical/artifacts
+make recompile # release build: keeps the lock file and bumps VERSION.yaml (major if the form changed, else minor)
+make compile   # build from scratch (re-solves the lock; VERSION.yaml starts at 0.0.0)
 make dev       # fast compile with the editable ext-wd (wt-compiler-env-overrides.toml)
 make run       # run param.yaml on real data -> /tmp/event-details-categorical/output
 make open      # preview the dashboard (layout.json, view selector)
