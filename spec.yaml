@@ -17,7 +17,7 @@ requirements:
 
   # wd-partner-tasks: src/ecoscope-workflows-ext-wd (categorical tasks: _categorical.py).
   - name: ecoscope-workflows-ext-wd
-    version: "0.0.8"
+    version: "0.0.10"
     channel: https://repo.prefix.dev/ecoscope-workflows-custom/
 
 rjsf-overrides:
@@ -513,6 +513,11 @@ workflow:
   # has slots for 8, unused slots are dropped)
   - id: field_widgets
     task: draw_categorical_field_widgets
+    # no events: split_groups is skipped; the task's fallback then draws no widgets,
+    # so the dashboard still shows ("no data" in every other widget)
+    skipif:
+      conditions:
+        - never
     partial:
       views: ${{ workflow.events_split.return }}
       catalogue: ${{ workflow.catalogue.return }}
@@ -741,16 +746,28 @@ workflow:
 
   - id: values_file
     task: create_files_single_view
+    # no events: an empty file list (its fallback), so the dashboard still shows
+    skipif:
+      conditions:
+        - never
     partial:
       files: ${{ workflow.all_values_csv.return }}
 
   - id: events_file
     task: create_files_single_view
+    # no events: an empty file list (its fallback), so the dashboard still shows
+    skipif:
+      conditions:
+        - never
     partial:
       files: ${{ workflow.events_csv.return }}
 
   - id: crosstab_file
     task: create_files_single_view
+    # no events: an empty file list (its fallback), so the dashboard still shows
+    skipif:
+      conditions:
+        - never
     partial:
       files: ${{ workflow.crosstab_csv.return }}
 
