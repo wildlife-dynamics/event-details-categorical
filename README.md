@@ -65,15 +65,14 @@ Type each field **as it reads on the form**, e.g. `Water Status`. Case, spaces a
 
 | Widget | Shows |
 |---|---|
-| Events · Distinct values · % unknown or blank | Headline tiles for the main field, each with a small trend line |
-| *Main field* | Bar chart: the top 10 values plus "Other", with count and share |
+| Events · Distinct values · % blank | Headline tiles for the main field, each with a trend line over the whole period. Distinct values counts Unknown (a choice on the form); % blank counts unanswered events |
+| *Main field* | Bar chart: the top 10 values plus "Other", with count and share, each value in its own colour |
 | Breakdown | Sunburst chart, ring by ring (e.g. type of death, then cause). Click a slice to zoom |
 | *Main field* over time | Share of each value per period (100% stacked bars); switch to Counts or Lines |
 | Cross-tabs | A heatmap per chosen pair; switch between counts and row % |
-| Where each value was recorded | Map of events coloured by the main field, sized by how many were recorded at the same spot |
-| Where each value is concentrated | Grid map per top value: darker squares hold more events; squares with fewer than 5 are pale |
-| One map per value | Each top value on its own map, with other events in grey |
-| Values table | Every value of every field: count, share, grid squares and reporters |
+| *Main field* by location | Map of events coloured by the main field, sized by how many were recorded at the same spot. Buttons: All, then each value (with Other, Unknown and blank); a value's events in colour, the rest in grey |
+| *Main field* density (*n* km squares) | Grid map per top value, plus Unknown and blank: darker squares hold more events; squares with fewer than 5 are pale |
+| Values table | Every value of every field: count, share, what the share is out of (all events, or for a follow-up the events where it was asked), grid squares and reporters |
 | *Each other field*, *… over time* | The same bar chart and chart over time for each other field |
 
 **Files** (Files tab): `values_summary.csv` (the values table), `crosstabs.csv` (every cross-tab cell) and `events.csv` (one row per event with the selected fields; no reporter names).
@@ -84,7 +83,7 @@ Type each field **as it reads on the form**, e.g. `Water Status`. Case, spaces a
 - **Unknown and blank** are shown in grey, never dropped. Answers such as "Unknown – please describe in notes" count as Unknown.
 - **Removed choices:** an answer whose choice was later taken off the form keeps its label, marked "(inactive)".
 - **Labels** are kept exactly as on the form; near-duplicates (e.g. "Elephant" and "Elephants") stay separate.
-- **Colours** are fixed for the whole run, so a value has the same colour in every view.
+- **Colours** are fixed for the whole run, so a value has the same colour in the bars, breakdown, charts over time and maps, in every view.
 - **Pick-several fields** can have several answers per event, so their bars can add up to more than the number of events (a note says so).
 - **No events in the period:** the dashboard opens with every widget showing "no data".
 

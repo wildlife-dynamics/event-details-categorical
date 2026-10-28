@@ -111,9 +111,6 @@ from ecoscope_workflows_ext_wd.tasks import (
     draw_categorical_points_map as draw_categorical_points_map,
 )
 from ecoscope_workflows_ext_wd.tasks import (
-    draw_categorical_small_multiples as draw_categorical_small_multiples,
-)
-from ecoscope_workflows_ext_wd.tasks import (
     draw_categorical_sunburst as draw_categorical_sunburst,
 )
 from ecoscope_workflows_ext_wd.tasks import (
@@ -647,6 +644,28 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .mapvalues(argnames=["text"], argvalues=grid_maps)
     )
 
+    grid_maps_title = (
+        task(categorical_widget_title)
+        .validate()
+        .set_task_instance_id("grid_maps_title")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            catalogue=catalogue,
+            cell_km=grid,
+            template="{main} density ({km} km squares)",
+            **(params.get("grid_maps_title") or {}),
+        )
+        .call()
+    )
+
     grid_maps_widget = (
         task(create_map_widget_single_view)
         .validate()
@@ -659,10 +678,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             ],
             unpack_depth=1,
         )
-        .partial(
-            title="Where each value is concentrated",
-            **(params.get("grid_maps_widget") or {}),
-        )
+        .partial(title=grid_maps_title, **(params.get("grid_maps_widget") or {}))
         .map(argnames=["view", "data"], argvalues=grid_maps_html)
     )
 
@@ -724,10 +740,10 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
-    kpi_unknown_title = (
+    kpi_blank_title = (
         task(categorical_widget_title)
         .validate()
-        .set_task_instance_id("kpi_unknown_title")
+        .set_task_instance_id("kpi_blank_title")
         .handle_errors()
         .with_tracing()
         .skipif(
@@ -739,8 +755,8 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             catalogue=catalogue,
-            template="{main}: % unknown or blank",
-            **(params.get("kpi_unknown_title") or {}),
+            template="{main}: % blank",
+            **(params.get("kpi_blank_title") or {}),
         )
         .call()
     )
@@ -762,6 +778,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             catalogue=catalogue,
             kpi="events",
             period=trend_period,
+            time_range=time_range,
             **(params.get("kpi_events") or {}),
         )
         .mapvalues(argnames=["df"], argvalues=events_split)
@@ -837,6 +854,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             catalogue=catalogue,
             kpi="distinct",
             period=trend_period,
+            time_range=time_range,
             **(params.get("kpi_distinct") or {}),
         )
         .mapvalues(argnames=["df"], argvalues=events_split)
@@ -897,10 +915,10 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
-    kpi_unknown = (
+    kpi_blank = (
         task(draw_categorical_kpi)
         .validate()
-        .set_task_instance_id("kpi_unknown")
+        .set_task_instance_id("kpi_blank")
         .handle_errors()
         .with_tracing()
         .skipif(
@@ -912,17 +930,18 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             catalogue=catalogue,
-            kpi="unknown",
+            kpi="blank",
             period=trend_period,
-            **(params.get("kpi_unknown") or {}),
+            time_range=time_range,
+            **(params.get("kpi_blank") or {}),
         )
         .mapvalues(argnames=["df"], argvalues=events_split)
     )
 
-    kpi_unknown_html = (
+    kpi_blank_html = (
         task(persist_text)
         .validate()
-        .set_task_instance_id("kpi_unknown_html")
+        .set_task_instance_id("kpi_blank_html")
         .handle_errors()
         .with_tracing()
         .skipif(
@@ -934,16 +953,16 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-            filename_suffix="kpi_unknown",
-            **(params.get("kpi_unknown_html") or {}),
+            filename_suffix="kpi_blank",
+            **(params.get("kpi_blank_html") or {}),
         )
-        .mapvalues(argnames=["text"], argvalues=kpi_unknown)
+        .mapvalues(argnames=["text"], argvalues=kpi_blank)
     )
 
-    kpi_unknown_widget = (
+    kpi_blank_widget = (
         task(create_plot_widget_single_view)
         .validate()
-        .set_task_instance_id("kpi_unknown_widget")
+        .set_task_instance_id("kpi_blank_widget")
         .handle_errors()
         .with_tracing()
         .skipif(
@@ -952,14 +971,14 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             ],
             unpack_depth=1,
         )
-        .partial(title=kpi_unknown_title, **(params.get("kpi_unknown_widget") or {}))
-        .map(argnames=["view", "data"], argvalues=kpi_unknown_html)
+        .partial(title=kpi_blank_title, **(params.get("kpi_blank_widget") or {}))
+        .map(argnames=["view", "data"], argvalues=kpi_blank_html)
     )
 
-    kpi_unknown_merged = (
+    kpi_blank_merged = (
         task(merge_widget_views)
         .validate()
-        .set_task_instance_id("kpi_unknown_merged")
+        .set_task_instance_id("kpi_blank_merged")
         .handle_errors()
         .with_tracing()
         .skipif(
@@ -968,7 +987,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             ],
             unpack_depth=1,
         )
-        .partial(widgets=kpi_unknown_widget, **(params.get("kpi_unknown_merged") or {}))
+        .partial(widgets=kpi_blank_widget, **(params.get("kpi_blank_merged") or {}))
         .call()
     )
 
@@ -1276,6 +1295,27 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .mapvalues(argnames=["text"], argvalues=points_map)
     )
 
+    points_map_title = (
+        task(categorical_widget_title)
+        .validate()
+        .set_task_instance_id("points_map_title")
+        .handle_errors()
+        .with_tracing()
+        .skipif(
+            conditions=[
+                any_is_empty_df,
+                any_dependency_skipped,
+            ],
+            unpack_depth=1,
+        )
+        .partial(
+            catalogue=catalogue,
+            template="{main} by location",
+            **(params.get("points_map_title") or {}),
+        )
+        .call()
+    )
+
     points_map_widget = (
         task(create_map_widget_single_view)
         .validate()
@@ -1288,10 +1328,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             ],
             unpack_depth=1,
         )
-        .partial(
-            title="Where each value was recorded",
-            **(params.get("points_map_widget") or {}),
-        )
+        .partial(title=points_map_title, **(params.get("points_map_widget") or {}))
         .map(argnames=["view", "data"], argvalues=points_map_html)
     )
 
@@ -1308,86 +1345,6 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(widgets=points_map_widget, **(params.get("points_map_merged") or {}))
-        .call()
-    )
-
-    small_multiples = (
-        task(draw_categorical_small_multiples)
-        .validate()
-        .set_task_instance_id("small_multiples")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            catalogue=catalogue,
-            ranking=ranking,
-            tile_layers=base_maps,
-            **(params.get("small_multiples") or {}),
-        )
-        .mapvalues(argnames=["df"], argvalues=events_split)
-    )
-
-    small_multiples_html = (
-        task(persist_text)
-        .validate()
-        .set_task_instance_id("small_multiples_html")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-            filename_suffix="small_multiples",
-            **(params.get("small_multiples_html") or {}),
-        )
-        .mapvalues(argnames=["text"], argvalues=small_multiples)
-    )
-
-    small_multiples_widget = (
-        task(create_map_widget_single_view)
-        .validate()
-        .set_task_instance_id("small_multiples_widget")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                never,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            title="One map per value", **(params.get("small_multiples_widget") or {})
-        )
-        .map(argnames=["view", "data"], argvalues=small_multiples_html)
-    )
-
-    small_multiples_merged = (
-        task(merge_widget_views)
-        .validate()
-        .set_task_instance_id("small_multiples_merged")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                never,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            widgets=small_multiples_widget,
-            **(params.get("small_multiples_merged") or {}),
-        )
         .call()
     )
 
@@ -1689,14 +1646,13 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             widgets=[
                 kpi_events_merged,
                 kpi_distinct_merged,
-                kpi_unknown_merged,
+                kpi_blank_merged,
                 bars_main_merged,
                 sunburst_merged,
                 trends_main_merged,
                 crosstabs_merged,
                 points_map_merged,
                 grid_maps_merged,
-                small_multiples_merged,
                 summary_table_merged,
                 field_widgets,
             ],

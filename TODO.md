@@ -2,6 +2,31 @@
 
 Open work for the Event Details - Categorical Field workflow. Background is in `PLAN.md`.
 
+## India's feedback (issue #6, 2026-10-28)
+
+Released in ext-wd 0.0.11 (PR #50); workflow 0.4.0.
+
+- [x] **Distinct values counts Unknown** (a choice on the form); only blank is left out, so the tile matches the bar chart.
+- [x] **"% unknown or blank" → "% blank"**, counting blank answers only (spec: `kpi: blank`, title "{main}: % blank", ids `kpi_unknown*` → `kpi_blank*`).
+- [x] **Sparklines span the run's whole time range** (tiles get `time_range`).
+- [x] **Same colour for a value everywhere**: bars use each value's colour (as the breakdown, charts over time and maps); values past the 8 colours are slate.
+- [x] **Whole-number count axes** (bars, Counts, pick-several lines): no 0.5 ticks.
+- [x] **Points map tabs**: All, then each value, Other, Unknown and (blank); the selected value in colour, the rest in grey. "One map per value" removed from the spec and layout.json (widget ids after it shifted down by one; the grid map is now full width).
+- [x] **Grid maps also show Unknown and (blank)**.
+- [x] **Map titles**: "{main} by location" and "{main} density ({km} km squares)".
+- [x] **Values table "Share of" column**: "all 260 events", or for a follow-up "34 events where Type of Death is Poached".
+- Pie chart breakdown: no change (India likes it).
+
+Next:
+- [x] Checked on a dev build with India's example (Naibunga animal carcasses, Sep–Oct 2026): distinct 3, % blank 0%, sparklines 31 Aug–26 Oct, bars coloured like the pie, axis 0-1-2-3, map tabs All/Natural/Conflict/Unknown, new titles, Share of.
+- [x] ext-wd #50 merged and released as **0.0.11**; workflow rebuilt with `make recompile` (0.4.0).
+- [x] Snapshots updated (new titles, one widget fewer); all 7 test cases and `make run` pass.
+- [ ] Reply on issue #6, item by item, and ask India to confirm the choices:
+  - value tabs show the other events in grey (like the old "One map per value");
+  - (blank) gets a tab on both maps, next to Unknown;
+  - % blank lines leave gaps in weeks with no events (the axis covers the whole period).
+- [x] README updated (tiles, map titles and tabs, no "One map per value", values table "Share of", colours).
+
 ## Release
 
 - [x] Merge wd-partner-tasks PRs #40, #42 (categorical) and #41 (incidents).
