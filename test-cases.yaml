@@ -65,8 +65,7 @@ naibungalower-wildlife-sighting:
 naibungalower-ranger-sightings:
   name: Naibunga Lower, ranger wildlife sightings
   description: >-
-    1,971 ranger sightings (2025-2026), 40% with no location answered; no grouping;
-    the summary grid option.
+    1,971 ranger sightings (2025-2026), 40% with no location answered; no grouping.
   params:
     workflow_details:
       name: Ranger Wildlife Sightings - Location
