@@ -53,7 +53,7 @@
             "data": "tmpfile",
             "id": 2,
             "is_filtered": true,
-            "title": "Water Status: % unknown or blank",
+            "title": "Water Status: % blank",
             "widget_type": "graph"
           },
           {
@@ -88,96 +88,89 @@
             "data": "tmpfile",
             "id": 7,
             "is_filtered": true,
-            "title": "Where each value was recorded",
+            "title": "Water Status by location",
             "widget_type": "map"
           },
           {
             "data": "tmpfile",
             "id": 8,
             "is_filtered": true,
-            "title": "Where each value is concentrated",
+            "title": "Water Status density (1 km squares)",
             "widget_type": "map"
           },
           {
             "data": "tmpfile",
             "id": 9,
             "is_filtered": true,
-            "title": "One map per value",
-            "widget_type": "map"
-          },
-          {
-            "data": "tmpfile",
-            "id": 10,
-            "is_filtered": true,
             "title": "Values table",
             "widget_type": "table"
           },
           {
             "data": "tmpfile",
-            "id": 11,
+            "id": 10,
             "is_filtered": true,
             "title": "Post",
             "widget_type": "graph"
           },
           {
             "data": "tmpfile",
-            "id": 12,
+            "id": 11,
             "is_filtered": true,
             "title": "Post over time",
             "widget_type": "graph"
           },
           {
             "data": "tmpfile",
-            "id": 13,
+            "id": 12,
             "is_filtered": true,
             "title": "Morning Call Up Conducted",
             "widget_type": "graph"
           },
           {
             "data": "tmpfile",
-            "id": 14,
+            "id": 13,
             "is_filtered": true,
             "title": "Morning Call Up Conducted over time",
             "widget_type": "graph"
           },
           {
             "data": "tmpfile",
-            "id": 15,
+            "id": 14,
             "is_filtered": true,
             "title": "Evening Call Up Conducted",
             "widget_type": "graph"
           },
           {
             "data": "tmpfile",
-            "id": 16,
+            "id": 15,
             "is_filtered": true,
             "title": "Evening Call Up Conducted over time",
             "widget_type": "graph"
           },
           {
             "data": "tmpfile",
-            "id": 17,
+            "id": 16,
             "is_filtered": true,
             "title": "Technical Issues",
             "widget_type": "graph"
           },
           {
             "data": "tmpfile",
-            "id": 18,
+            "id": 17,
             "is_filtered": true,
             "title": "Technical Issues over time",
             "widget_type": "graph"
           },
           {
             "data": "tmpfile",
-            "id": 19,
+            "id": 18,
             "is_filtered": true,
             "title": "Watch Keeper Checklist",
             "widget_type": "graph"
           },
           {
             "data": "tmpfile",
-            "id": 20,
+            "id": 19,
             "is_filtered": true,
             "title": "Watch Keeper Checklist over time",
             "widget_type": "graph"

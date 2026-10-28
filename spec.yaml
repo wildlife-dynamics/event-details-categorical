@@ -17,7 +17,7 @@ requirements:
 
   # wd-partner-tasks: src/ecoscope-workflows-ext-wd (categorical tasks: _categorical.py).
   - name: ecoscope-workflows-ext-wd
-    version: "0.0.10"
+    version: "0.0.12"
     channel: https://repo.prefix.dev/ecoscope-workflows-custom/
 
 rjsf-overrides:
@@ -270,13 +270,20 @@ workflow:
           argnames: text
           argvalues: ${{ workflow.grid_maps.return }}
 
+      - id: grid_maps_title
+        task: categorical_widget_title
+        partial:
+          catalogue: ${{ workflow.catalogue.return }}
+          cell_km: ${{ workflow.grid.return }}
+          template: "{main} density ({km} km squares)"
+
       - id: grid_maps_widget
         task: create_map_widget_single_view
         skipif:
           conditions:
             - never
         partial:
-          title: Where each value is concentrated
+          title: ${{ workflow.grid_maps_title.return }}
         map:
           argnames: [view, data]
           argvalues: ${{ workflow.grid_maps_html.return }}
@@ -289,7 +296,7 @@ workflow:
         partial:
           widgets: ${{ workflow.grid_maps_widget.return }}
 
-  # ── 1 headline tiles: one widget each, a number and a sparkline (as QENP) ─────────
+  # ── 1 headline tiles: one widget each, a number and a sparkline ──────────────────
 
   - id: kpi_events_title
     task: categorical_widget_title
@@ -303,11 +310,11 @@ workflow:
       catalogue: ${{ workflow.catalogue.return }}
       template: "Distinct {main} values"
 
-  - id: kpi_unknown_title
+  - id: kpi_blank_title
     task: categorical_widget_title
     partial:
       catalogue: ${{ workflow.catalogue.return }}
-      template: "{main}: % unknown or blank"
+      template: "{main}: % blank"
 
   - id: kpi_events
     task: draw_categorical_kpi
@@ -315,6 +322,7 @@ workflow:
       catalogue: ${{ workflow.catalogue.return }}
       kpi: events
       period: ${{ workflow.trend_period.return }}
+      time_range: ${{ workflow.time_range.return }}
     mapvalues:
       argnames: df
       argvalues: ${{ workflow.events_split.return }}
@@ -353,6 +361,7 @@ workflow:
       catalogue: ${{ workflow.catalogue.return }}
       kpi: distinct
       period: ${{ workflow.trend_period.return }}
+      time_range: ${{ workflow.time_range.return }}
     mapvalues:
       argnames: df
       argvalues: ${{ workflow.events_split.return }}
@@ -385,43 +394,44 @@ workflow:
     partial:
       widgets: ${{ workflow.kpi_distinct_widget.return }}
 
-  - id: kpi_unknown
+  - id: kpi_blank
     task: draw_categorical_kpi
     partial:
       catalogue: ${{ workflow.catalogue.return }}
-      kpi: unknown
+      kpi: blank
       period: ${{ workflow.trend_period.return }}
+      time_range: ${{ workflow.time_range.return }}
     mapvalues:
       argnames: df
       argvalues: ${{ workflow.events_split.return }}
 
-  - id: kpi_unknown_html
+  - id: kpi_blank_html
     task: persist_text
     partial:
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      filename_suffix: kpi_unknown
+      filename_suffix: kpi_blank
     mapvalues:
       argnames: text
-      argvalues: ${{ workflow.kpi_unknown.return }}
+      argvalues: ${{ workflow.kpi_blank.return }}
 
-  - id: kpi_unknown_widget
+  - id: kpi_blank_widget
     task: create_plot_widget_single_view
     skipif:
       conditions:
         - never
     partial:
-      title: ${{ workflow.kpi_unknown_title.return }}
+      title: ${{ workflow.kpi_blank_title.return }}
     map:
       argnames: [view, data]
-      argvalues: ${{ workflow.kpi_unknown_html.return }}
+      argvalues: ${{ workflow.kpi_blank_html.return }}
 
-  - id: kpi_unknown_merged
+  - id: kpi_blank_merged
     task: merge_widget_views
     skipif:
       conditions:
         - never
     partial:
-      widgets: ${{ workflow.kpi_unknown_widget.return }}
+      widgets: ${{ workflow.kpi_blank_widget.return }}
 
   # ── 2 sunburst ────────────────────────────────────────────────────────────────
 
@@ -585,13 +595,19 @@ workflow:
       argnames: text
       argvalues: ${{ workflow.points_map.return }}
 
+  - id: points_map_title
+    task: categorical_widget_title
+    partial:
+      catalogue: ${{ workflow.catalogue.return }}
+      template: "{main} by location"
+
   - id: points_map_widget
     task: create_map_widget_single_view
     skipif:
       conditions:
         - never
     partial:
-      title: Where each value was recorded
+      title: ${{ workflow.points_map_title.return }}
     map:
       argnames: [view, data]
       argvalues: ${{ workflow.points_map_html.return }}
@@ -603,44 +619,6 @@ workflow:
         - never
     partial:
       widgets: ${{ workflow.points_map_widget.return }}
-
-  - id: small_multiples
-    task: draw_categorical_small_multiples
-    partial:
-      catalogue: ${{ workflow.catalogue.return }}
-      ranking: ${{ workflow.ranking.return }}
-      tile_layers: ${{ workflow.base_maps.return }}
-    mapvalues:
-      argnames: df
-      argvalues: ${{ workflow.events_split.return }}
-
-  - id: small_multiples_html
-    task: persist_text
-    partial:
-      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      filename_suffix: small_multiples
-    mapvalues:
-      argnames: text
-      argvalues: ${{ workflow.small_multiples.return }}
-
-  - id: small_multiples_widget
-    task: create_map_widget_single_view
-    skipif:
-      conditions:
-        - never
-    partial:
-      title: One map per value
-    map:
-      argnames: [view, data]
-      argvalues: ${{ workflow.small_multiples_html.return }}
-
-  - id: small_multiples_merged
-    task: merge_widget_views
-    skipif:
-      conditions:
-        - never
-    partial:
-      widgets: ${{ workflow.small_multiples_widget.return }}
 
   # ── 7 tables and files ────────────────────────────────────────────────────────
 
@@ -779,14 +757,13 @@ workflow:
       widgets:
         - ${{ workflow.kpi_events_merged.return }}
         - ${{ workflow.kpi_distinct_merged.return }}
-        - ${{ workflow.kpi_unknown_merged.return }}
+        - ${{ workflow.kpi_blank_merged.return }}
         - ${{ workflow.bars_main_merged.return }}
         - ${{ workflow.sunburst_merged.return }}
         - ${{ workflow.trends_main_merged.return }}
         - ${{ workflow.crosstabs_merged.return }}
         - ${{ workflow.points_map_merged.return }}
         - ${{ workflow.grid_maps_merged.return }}
-        - ${{ workflow.small_multiples_merged.return }}
         - ${{ workflow.summary_table_merged.return }}
         - ${{ workflow.field_widgets.return }}
       groupers: ${{ workflow.resolved_groupers.return }}

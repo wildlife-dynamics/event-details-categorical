@@ -17,7 +17,7 @@ OUTPUT_DIR    ?= /tmp/event-details-categorical/output
 # released to prefix.dev. `make build` builds ext-wd into a local channel for trying
 # unreleased changes (point spec.yaml at it while you do).
 EXT_LIB_DIR   ?= $(shell dirname $(CURDIR))/wd-partner-tasks-categorical
-EXT_VERSION   ?= 0.0.10
+EXT_VERSION   ?= 0.0.12
 # the editable ext-wd (wt-compiler-env-overrides.toml) takes its version from git tags, and
 # the nearest tag may be another partner's: pin it
 export SETUPTOOLS_SCM_PRETEND_VERSION ?= $(EXT_VERSION)
