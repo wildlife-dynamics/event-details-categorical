@@ -70,8 +70,8 @@ Type each field **as it reads on the form**, e.g. `Water Status`. Case, spaces a
 | Breakdown | Sunburst chart, ring by ring (e.g. type of death, then cause). Click a slice to zoom |
 | *Main field* over time | Share of each value per period (100% stacked bars); switch to Counts or Lines |
 | Cross-tabs | A heatmap per chosen pair; switch between counts and row % |
-| *Main field* by location | Map of events coloured by the main field, sized by how many were recorded at the same spot. Buttons: All, then each value (with Other, Unknown and blank); a value's events in colour, the rest in grey |
-| *Main field* density (*n* km squares) | Grid map per top value, plus Unknown and blank: darker squares hold more events; squares with fewer than 5 are pale |
+| *Main field* by location | Map of events coloured by the main field, sized by how many were recorded at the same spot. Buttons: All, then each value, then Other; a value's events in colour, the other events as grey dots |
+| *Main field* density (*n* km squares) | Grid map with the same buttons (All, each value, Other): darker squares hold more events; squares with fewer than 5 are pale |
 | Values table | Every value of every field: count, share, what the share is out of (all events, or for a follow-up the events where it was asked), grid squares and reporters |
 | *Each other field*, *… over time* | The same bar chart and chart over time for each other field |
 
@@ -80,7 +80,8 @@ Type each field **as it reads on the form**, e.g. `Water Status`. Case, spaces a
 ### How values are counted
 
 - **Other:** less common values are grouped as "Other (k values)"; hover to see what it holds. Values tied at the cut-off are kept together.
-- **Unknown and blank** are shown in grey, never dropped. Answers such as "Unknown – please describe in notes" count as Unknown.
+- **Unknown** is a choice like any other: it has its own colour and counts as a distinct value. Answers such as "Unknown – please describe in notes" count as Unknown.
+- **Blank** (unanswered) is shown in grey, never dropped. Grey otherwise means "Other", or the other events on a map tab.
 - **Removed choices:** an answer whose choice was later taken off the form keeps its label, marked "(inactive)".
 - **Labels** are kept exactly as on the form; near-duplicates (e.g. "Elephant" and "Elephants") stay separate.
 - **Colours** are fixed for the whole run, so a value has the same colour in the bars, breakdown, charts over time and maps, in every view.

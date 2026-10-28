@@ -4,7 +4,7 @@ Open work for the Event Details - Categorical Field workflow. Background is in `
 
 ## India's feedback (issue #6, 2026-10-28)
 
-Released in ext-wd 0.0.11 (PR #50); workflow 0.4.0.
+Released in ext-wd 0.0.11 (PR #50) and 0.0.12 (PR #51); workflow 0.4.0.
 
 - [x] **Distinct values counts Unknown** (a choice on the form); only blank is left out, so the tile matches the bar chart.
 - [x] **"% unknown or blank" → "% blank"**, counting blank answers only (spec: `kpi: blank`, title "{main}: % blank", ids `kpi_unknown*` → `kpi_blank*`).
@@ -21,10 +21,8 @@ Next:
 - [x] Checked on a dev build with India's example (Naibunga animal carcasses, Sep–Oct 2026): distinct 3, % blank 0%, sparklines 31 Aug–26 Oct, bars coloured like the pie, axis 0-1-2-3, map tabs All/Natural/Conflict/Unknown, new titles, Share of.
 - [x] ext-wd #50 merged and released as **0.0.11**; workflow rebuilt with `make recompile` (0.4.0).
 - [x] Snapshots updated (new titles, one widget fewer); all 7 test cases and `make run` pass.
-- [ ] Reply on issue #6, item by item, and ask India to confirm the choices:
-  - value tabs show the other events in grey (like the old "One map per value");
-  - (blank) gets a tab on both maps, next to Unknown;
-  - % blank lines leave gaps in weeks with no events (the axis covers the whole period).
+- [x] Point 7 settled (ext-wd 0.0.12): both maps have the same tabs (All, values, Other); no (blank) tab; Unknown is a choice like any other (own colour everywhere); grey is reserved for Other and the other events (grey dots #b5b3ad, 4 px, 90% opacity, no outline).
+- [ ] Reply on issue #6, item by item, once the workflow PR is merged.
 - [x] README updated (tiles, map titles and tabs, no "One map per value", values table "Share of", colours).
 
 ## Release
