@@ -13,7 +13,7 @@ from urllib.request import url2pathname
 
 import click
 
-RELEASE_NAME = "ecoscope-workflows-event-details-categorical-workflow"
+RELEASE_NAME = "ecoscope-workflows-categorical-workflow"
 
 
 @click.group()

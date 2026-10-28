@@ -9,7 +9,7 @@
 -include Makefile.local
 
 WORKFLOW_ID   := event-details-categorical
-WORKFLOW_DIR  ?= ecoscope-workflows-event-details-categorical-workflow
+WORKFLOW_DIR  ?= ecoscope-workflows-categorical-workflow
 PARAM_FILE    ?= param.yaml
 OUTPUT_DIR    ?= /tmp/event-details-categorical/output
 # Categorical tasks live in ext-wd (wd-partner-tasks, checked out at
@@ -147,7 +147,7 @@ run: setup ## Run the workflow with param.yaml (real data — no mock IO)
 	$(call print_head,🚀,Execution Log,$(PEACH))
 	@cd $(WORKFLOW_DIR) && \
 	ECOSCOPE_WORKFLOWS_RESULTS="file://$(OUTPUT_DIR)" \
-	pixi run ecoscope-workflows-event-details-categorical-workflow run \
+	pixi run ecoscope-workflows-categorical-workflow run \
 		--config-file $(abspath $(PARAM_FILE)) \
 		--execution-mode sequential \
 		--no-mock-io
