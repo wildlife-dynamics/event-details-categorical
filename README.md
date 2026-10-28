@@ -12,7 +12,7 @@ It complements the [Event Details](https://github.com/ecoscope-platform-workflow
 
 ## Installing
 
-In Ecoscope Desktop, choose **Add Workflow Template** and give it this repository, or a local folder holding the compiled workflow (`ecoscope-workflows-event-details-categorical-workflow`).
+In Ecoscope Desktop, choose **Add Workflow Template** and give it this repository, or a local folder holding the compiled workflow (`ecoscope-workflows-categorical-workflow`).
 
 ### Windows: turn on long paths
 
