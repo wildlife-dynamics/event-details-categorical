@@ -15,11 +15,7 @@ time_range:
 fields:
   event_type: elephant_sighting_rep
   main_field: Location
-  other_fields: [Sighting, Conservancy]
-  cross_tabs:
-    - {rows: Location, columns: Sighting}
-  sunburst_fields: []
-  natural_order_fields: []
+  keep_form_order: false
   show_full_list: false
 
 groupers:
