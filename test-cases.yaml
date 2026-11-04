@@ -17,11 +17,7 @@ naibungalower-post-report:
     fields:
       event_type: post_rep
       main_field: Water Status
-      other_fields: [Post, Morning Call Up Conducted, Evening Call Up Conducted, Technical Issues, Watch Keeper Checklist]
-      cross_tabs:
-        - {rows: Post, columns: Water Status}
-      sunburst_fields: []
-      natural_order_fields: [Water Status]
+      keep_form_order: true
       show_full_list: false
     groupers:
       groupers:
@@ -49,11 +45,7 @@ naibungalower-wildlife-sighting:
     fields:
       event_type: wildlife_sighting
       main_field: Species
-      other_fields: [Sighting type]
-      cross_tabs:
-        - {rows: Species, columns: Sighting type}
-      sunburst_fields: []
-      natural_order_fields: []
+      keep_form_order: false
       show_full_list: false
     groupers:
       groupers:
@@ -80,11 +72,7 @@ naibungalower-ranger-sightings:
     fields:
       event_type: wildlife_sighting_rep_ranger
       main_field: Location
-      other_fields: [Conservancy, Actions Checklist]
-      cross_tabs:
-        - {rows: Location, columns: Conservancy}
-      sunburst_fields: []
-      natural_order_fields: []
+      keep_form_order: false
       show_full_list: false
     groupers:
       groupers: []
@@ -112,11 +100,8 @@ wd-bird-point-count:
     fields:
       event_type: bird_point_count
       main_field: "Detection: Species"
-      other_fields: ["Detection: Distance band", "Detection: Time interval", "Detection: Detection type", Station]
-      cross_tabs:
-        - {rows: "Detection: Species", columns: "Detection: Distance band"}
-      sunburst_fields: []
-      natural_order_fields: ["Detection: Distance band", "Detection: Time interval"]
+      count_field: "Detection: Count"
+      keep_form_order: false
       show_full_list: false
     groupers:
       groupers: []
@@ -145,46 +130,11 @@ naibungalower-carcass-invented:
     fields:
       event_type: animal_carcass
       main_field: Type of death
-      other_fields: ["Cause of Death (POACHED)", "Cause of Death (NATURAL)", "Cause of Death (CONFLICT)", "Cause of Death (PAC)", Species, Action taken]
-      cross_tabs:
-        - {rows: Species, columns: Type of death}
-      sunburst_fields: []
-      natural_order_fields: []
+      keep_form_order: false
       show_full_list: false
     groupers:
       groupers:
         - index_name: quarter
-    base_maps: {}
-    trend_period: {period: auto}
-    grid: {}
-
-naibungalower-post-report-main-only:
-  name: Naibunga Lower post reports, main field only
-  description: >-
-    No other fields and no cross-tabs: only the main field's widgets, a one-ring breakdown,
-    "No cross-tabs selected." and a headers-only crosstabs.csv. Shares mock-io/ with
-    naibungalower-post-report.
-  params:
-    workflow_details:
-      name: Post Report - Water Status only
-      description: ""
-    er_client:
-      data_source:
-        name: naibungalower
-    time_range:
-      since: "2025-01-01T00:00:00.000Z"
-      until: "2026-10-15T00:00:00.000Z"
-      timezone: {label: "UTC+03:00", tzCode: Africa/Nairobi, name: Africa/Nairobi, utc: "+03:00"}
-    fields:
-      event_type: post_rep
-      main_field: Water Status
-      other_fields: []
-      cross_tabs: []
-      sunburst_fields: []
-      natural_order_fields: [Water Status]
-      show_full_list: false
-    groupers:
-      groupers: []
     base_maps: {}
     trend_period: {period: auto}
     grid: {}
@@ -210,11 +160,7 @@ naibungalower-post-report-no-events:
     fields:
       event_type: post_rep
       main_field: Water Status
-      other_fields: [Post, Technical Issues]
-      cross_tabs:
-        - {rows: Post, columns: Water Status}
-      sunburst_fields: []
-      natural_order_fields: [Water Status]
+      keep_form_order: true
       show_full_list: false
     groupers:
       groupers: []

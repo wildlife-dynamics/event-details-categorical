@@ -25,8 +25,8 @@
       "properties": {
         "data_source": {
           "$ref": "#/$defs/EarthRangerConnection",
-          "title": "",
-          "description": "Select one of your configured data sources."
+          "description": "Select one of your configured data sources.",
+          "title": ""
         }
       },
       "required": [
@@ -39,23 +39,19 @@
       "additionalProperties": false,
       "properties": {
         "since": {
+          "description": "The start time",
           "format": "date-time",
           "title": "Since",
-          "type": "string",
-          "description": "The start time"
+          "type": "string"
         },
         "until": {
+          "description": "The end time",
           "format": "date-time",
           "title": "Until",
-          "type": "string",
-          "description": "The end time"
+          "type": "string"
         },
         "timezone": {
-          "allOf": [
-            {
-              "$ref": "#/$defs/TimezoneInfo"
-            }
-          ],
+          "$ref": "#/$defs/TimezoneInfo",
           "default": null,
           "title": "Timezone"
         }
@@ -72,9 +68,9 @@
       "additionalProperties": false,
       "properties": {
         "event_type": {
+          "description": "Select the event type to analyze.",
           "title": "Event Type",
           "type": "string",
-          "description": "Select the event type to analyze.",
           "ecoscope:transform": [
             {
               "transformer": "EarthRangerEnumResolver",
@@ -86,55 +82,30 @@
           ]
         },
         "main_field": {
-          "title": "Main Field - Choice field to analyze",
-          "type": "string",
-          "description": "Select the choice field the workflow will summarize, e.g. Species. Each choice will be represented by a different color in the outputs. Type the field as it appears on the form; it must allow one choice per event."
+          "description": "Select the choice field the workflow will summarize, e.g. Species. Each choice will be represented by a different color in the outputs. Type the field as it appears on the form; it must allow one choice per event.",
+          "title": "Categorical Field - Choice field to analyze",
+          "type": "string"
         },
-        "other_fields": {
-          "default": [],
-          "items": {
-            "type": "string"
-          },
-          "maxItems": 8,
-          "title": "Other Fields - More choice fields to summarize",
-          "type": "array",
-          "description": "Add more choice fields to summarize, up to 8. Each field gets its own charts in the outputs."
+        "count_field": {
+          "default": "",
+          "description": "Choose a number field, e.g. Count, to total it for each choice instead of counting records (e.g. animals seen rather than sightings). Type the field as it appears on the form. Leave empty to count records.",
+          "ecoscope:advanced": true,
+          "title": "Count Field - Number field to total",
+          "type": "string"
         },
-        "cross_tabs": {
-          "default": [],
-          "items": {
-            "$ref": "#/$defs/CrossTab"
-          },
-          "title": "Cross-tabs",
-          "type": "array",
-          "description": "Choose pairs of choice fields to compare in a table, e.g. rows Species, columns Cause of Death."
-        },
-        "sunburst_fields": {
-          "default": [],
-          "items": {
-            "type": "string"
-          },
-          "title": "Sunburst Rings",
-          "type": "array",
-          "description": "Choose the choice fields for the rings of the breakdown chart, from the center out. Leave empty to use the main field and the first other field.",
-          "ecoscope:advanced": true
-        },
-        "natural_order_fields": {
-          "default": [],
-          "items": {
-            "type": "string"
-          },
+        "keep_form_order": {
+          "default": false,
+          "description": "Show the choices in the order they appear on the form instead of by count, for fields with a natural order, e.g. age class.",
+          "ecoscope:advanced": true,
           "title": "Keep Form Order",
-          "type": "array",
-          "description": "Choose choice fields whose choices have a natural order, e.g. age class. Their choices will be shown in form order instead of by count.",
-          "ecoscope:advanced": true
+          "type": "boolean"
         },
         "show_full_list": {
           "default": false,
-          "title": "Show Every Value",
-          "type": "boolean",
           "description": "Show every choice in the outputs instead of the 10 most common plus Other.",
-          "ecoscope:advanced": true
+          "ecoscope:advanced": true,
+          "title": "Show Every Value",
+          "type": "boolean"
         }
       },
       "required": [
@@ -149,6 +120,7 @@
       "properties": {
         "groupers": {
           "default": null,
+          "description": "Choose how to split the outputs into views, e.g. by year, reporter or area (optional). Leave empty for one view of all events.",
           "items": {
             "anyOf": [
               {
@@ -165,7 +137,6 @@
           },
           "title": " ",
           "type": "array",
-          "description": "Choose how to split the outputs into views, e.g. by year, reporter or area (optional). Leave empty for one view of all events.",
           "ecoscope:transform": [
             {
               "transformer": "EarthRangerEnumResolver",
@@ -199,8 +170,9 @@
               "min_zoom": 0
             }
           ],
+          "description": "Select tile layers to use as base layers in map outputs. The first layer in the list will be the bottommost layer displayed.",
+          "ecoscope:advanced": true,
           "items": {
-            "title": "Base Layer",
             "anyOf": [
               {
                 "description": "A tiled raster layer loaded on-demand from a URL template (e.g., base maps).",
@@ -218,8 +190,8 @@
                     "default": 1,
                     "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
                     "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "title": "Layer Opacity",
                     "type": "number"
                   }
@@ -243,8 +215,8 @@
                     "default": 1,
                     "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
                     "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "title": "Layer Opacity",
                     "type": "number"
                   }
@@ -268,8 +240,8 @@
                     "default": 1,
                     "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
                     "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "title": "Layer Opacity",
                     "type": "number"
                   }
@@ -293,8 +265,8 @@
                     "default": 1,
                     "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
                     "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "title": "Layer Opacity",
                     "type": "number"
                   }
@@ -318,8 +290,8 @@
                     "default": 1,
                     "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
                     "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "title": "Layer Opacity",
                     "type": "number"
                   }
@@ -341,8 +313,8 @@
                     "default": 1,
                     "description": "Set layer transparency from 1 (fully visible) to 0 (hidden).",
                     "ecoscope:advanced": true,
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "title": "Custom Layer Opacity",
                     "type": "number"
                   },
@@ -362,12 +334,11 @@
                 "title": "Custom Layer (Advanced)",
                 "type": "object"
               }
-            ]
+            ],
+            "title": "Base Layer"
           },
           "title": " ",
-          "type": "array",
-          "description": "Select tile layers to use as base layers in map outputs. The first layer in the list will be the bottommost layer displayed.",
-          "ecoscope:advanced": true
+          "type": "array"
         }
       },
       "type": "object",
@@ -384,6 +355,8 @@
           "properties": {
             "period": {
               "default": "auto",
+              "description": "Choose the time interval for the charts over time. Auto picks one based on the time range.",
+              "ecoscope:advanced": true,
               "enum": [
                 "auto",
                 "week",
@@ -392,9 +365,7 @@
                 "year"
               ],
               "title": "Time Period",
-              "type": "string",
-              "description": "Choose the time interval for the charts over time. Auto picks one based on the time range.",
-              "ecoscope:advanced": true
+              "type": "string"
             }
           },
           "type": "object",
@@ -413,10 +384,10 @@
           "properties": {
             "cell_size_km": {
               "default": null,
-              "title": "Grid Square Size (km)",
-              "type": "number",
               "description": "Set the size of the grid squares in km (optional). Leave empty to fit the squares to the area of the events.",
-              "ecoscope:advanced": true
+              "ecoscope:advanced": true,
+              "title": "Grid Square Size (km)",
+              "type": "number"
             }
           },
           "required": [],
@@ -466,26 +437,6 @@
         "utc"
       ],
       "title": "TimezoneInfo",
-      "type": "object"
-    },
-    "CrossTab": {
-      "properties": {
-        "rows": {
-          "description": "The choice field shown down the side of the table.",
-          "title": "Rows",
-          "type": "string"
-        },
-        "columns": {
-          "description": "The choice field shown across the top of the table.",
-          "title": "Columns",
-          "type": "string"
-        }
-      },
-      "required": [
-        "rows",
-        "columns"
-      ],
-      "title": "Pair",
       "type": "object"
     },
     "SpatialGrouper": {
@@ -590,19 +541,10 @@
       "ui:order": [
         "event_type",
         "main_field",
-        "other_fields",
-        "cross_tabs",
-        "sunburst_fields",
-        "natural_order_fields",
+        "count_field",
+        "keep_form_order",
         "show_full_list"
-      ],
-      "cross_tabs": {
-        "items": {
-          "ui:options": {
-            "orderable": false
-          }
-        }
-      }
+      ]
     },
     "ui:order": [
       "workflow_details",

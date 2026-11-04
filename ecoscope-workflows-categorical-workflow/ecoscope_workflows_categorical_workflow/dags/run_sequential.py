@@ -55,9 +55,6 @@ from ecoscope_workflows_ext_wd.tasks import (
     add_categorical_quarter as add_categorical_quarter,
 )
 from ecoscope_workflows_ext_wd.tasks import (
-    categorical_crosstab_table as categorical_crosstab_table,
-)
-from ecoscope_workflows_ext_wd.tasks import (
     categorical_events_table as categorical_events_table,
 )
 from ecoscope_workflows_ext_wd.tasks import (
@@ -68,12 +65,6 @@ from ecoscope_workflows_ext_wd.tasks import (
 )
 from ecoscope_workflows_ext_wd.tasks import (
     draw_categorical_bars as draw_categorical_bars,
-)
-from ecoscope_workflows_ext_wd.tasks import (
-    draw_categorical_crosstabs as draw_categorical_crosstabs,
-)
-from ecoscope_workflows_ext_wd.tasks import (
-    draw_categorical_field_widgets as draw_categorical_field_widgets,
 )
 from ecoscope_workflows_ext_wd.tasks import (
     draw_categorical_grid_maps as draw_categorical_grid_maps,
@@ -635,8 +626,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .with_tracing()
         .skipif(
             conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
+                never,
             ],
             unpack_depth=1,
         )
@@ -696,7 +686,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             catalogue=catalogue,
-            template="{Unit}",
+            template="{Measure}",
             **(params.get("kpi_events_title") or {}),
         )
         .call()
@@ -738,7 +728,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             catalogue=catalogue,
-            template="{main}: % blank",
+            template="{main}: blank",
             **(params.get("kpi_blank_title") or {}),
         )
         .call()
@@ -1140,101 +1130,6 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
-    field_widgets = (
-        task(draw_categorical_field_widgets)
-        .validate()
-        .set_task_instance_id("field_widgets")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                never,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            views=events_split,
-            catalogue=catalogue,
-            ranking=ranking,
-            root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-            period=trend_period,
-            **(params.get("field_widgets") or {}),
-        )
-        .call()
-    )
-
-    crosstabs = (
-        task(draw_categorical_crosstabs)
-        .validate()
-        .set_task_instance_id("crosstabs")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            catalogue=catalogue, ranking=ranking, **(params.get("crosstabs") or {})
-        )
-        .mapvalues(argnames=["df"], argvalues=events_split)
-    )
-
-    crosstabs_html = (
-        task(persist_text)
-        .validate()
-        .set_task_instance_id("crosstabs_html")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-            filename_suffix="crosstabs",
-            **(params.get("crosstabs_html") or {}),
-        )
-        .mapvalues(argnames=["text"], argvalues=crosstabs)
-    )
-
-    crosstabs_widget = (
-        task(create_plot_widget_single_view)
-        .validate()
-        .set_task_instance_id("crosstabs_widget")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                never,
-            ],
-            unpack_depth=1,
-        )
-        .partial(title="Cross-tabs", **(params.get("crosstabs_widget") or {}))
-        .map(argnames=["view", "data"], argvalues=crosstabs_html)
-    )
-
-    crosstabs_merged = (
-        task(merge_widget_views)
-        .validate()
-        .set_task_instance_id("crosstabs_merged")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                never,
-            ],
-            unpack_depth=1,
-        )
-        .partial(widgets=crosstabs_widget, **(params.get("crosstabs_merged") or {}))
-        .call()
-    )
-
     points_map = (
         task(draw_categorical_points_map)
         .validate()
@@ -1519,50 +1414,6 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
-    crosstab_table = (
-        task(categorical_crosstab_table)
-        .validate()
-        .set_task_instance_id("crosstab_table")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            df=events_indexed,
-            catalogue=catalogue,
-            ranking=ranking,
-            **(params.get("crosstab_table") or {}),
-        )
-        .call()
-    )
-
-    crosstab_csv = (
-        task(persist_df)
-        .validate()
-        .set_task_instance_id("crosstab_csv")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            df=crosstab_table,
-            filetype="csv",
-            filename="crosstabs",
-            root_path=os.environ["ECOSCOPE_WORKFLOWS_RESULTS"],
-            **(params.get("crosstab_csv") or {}),
-        )
-        .call()
-    )
-
     values_file = (
         task(create_files_single_view)
         .validate()
@@ -1595,22 +1446,6 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
-    crosstab_file = (
-        task(create_files_single_view)
-        .validate()
-        .set_task_instance_id("crosstab_file")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                never,
-            ],
-            unpack_depth=1,
-        )
-        .partial(files=crosstab_csv, **(params.get("crosstab_file") or {}))
-        .call()
-    )
-
     dashboard = (
         task(gather_dashboard)
         .validate()
@@ -1633,15 +1468,13 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
                 bars_main_merged,
                 sunburst_merged,
                 trends_main_merged,
-                crosstabs_merged,
                 points_map_merged,
                 grid_maps_merged,
                 summary_table_merged,
-                field_widgets,
             ],
             groupers=resolved_groupers,
             time_range=time_range,
-            files=[values_file, events_file, crosstab_file],
+            files=[values_file, events_file],
             **(params.get("dashboard") or {}),
         )
         .call()

@@ -17,7 +17,7 @@ requirements:
 
   # wd-partner-tasks: src/ecoscope-workflows-ext-wd (categorical tasks: _categorical.py).
   - name: ecoscope-workflows-ext-wd
-    version: "0.0.12"
+    version: "0.0.15"
     channel: https://repo.prefix.dev/ecoscope-workflows-custom/
 
 rjsf-overrides:
@@ -55,9 +55,6 @@ rjsf-overrides:
         title: Quarter
 
   uiSchema:
-    fields.cross_tabs.items:
-      ui:options:
-        orderable: false
     groupers.groupers.items.anyOf:
       - ui:options:
           label: false
@@ -272,6 +269,10 @@ workflow:
 
       - id: grid_maps_title
         task: categorical_widget_title
+        # no events: the grid size is skipped; the title goes without it
+        skipif:
+          conditions:
+            - never
         partial:
           catalogue: ${{ workflow.catalogue.return }}
           cell_km: ${{ workflow.grid.return }}
@@ -302,7 +303,7 @@ workflow:
     task: categorical_widget_title
     partial:
       catalogue: ${{ workflow.catalogue.return }}
-      template: "{Unit}"  # Events, or a repeating group's rows (Detections)
+      template: "{Measure}"  # Events (or Detections), or "Total <Count Field>" when one is set
 
   - id: kpi_distinct_title
     task: categorical_widget_title
@@ -314,7 +315,7 @@ workflow:
     task: categorical_widget_title
     partial:
       catalogue: ${{ workflow.catalogue.return }}
-      template: "{main}: % blank"
+      template: "{main}: blank"
 
   - id: kpi_events
     task: draw_categorical_kpi
@@ -472,7 +473,7 @@ workflow:
     partial:
       widgets: ${{ workflow.sunburst_widget.return }}
 
-  # ── 3 bars: the main field, then each other field in its own widgets ───────────
+  # ── 3 bars ──────────────────────────────────────────────────────────────────────
 
   - id: main_values_title
     task: categorical_widget_title
@@ -521,59 +522,6 @@ workflow:
   # each other field: its own values and over-time widgets (one view per group); they go
   # last in the widget list, so their number can follow the fields picked (layout.json
   # has slots for 8, unused slots are dropped)
-  - id: field_widgets
-    task: draw_categorical_field_widgets
-    # no events: split_groups is skipped; the task's fallback then draws no widgets,
-    # so the dashboard still shows ("no data" in every other widget)
-    skipif:
-      conditions:
-        - never
-    partial:
-      views: ${{ workflow.events_split.return }}
-      catalogue: ${{ workflow.catalogue.return }}
-      ranking: ${{ workflow.ranking.return }}
-      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      period: ${{ workflow.trend_period.return }}
-
-  # ── 5 cross-tabs ──────────────────────────────────────────────────────────────
-
-  - id: crosstabs
-    task: draw_categorical_crosstabs
-    partial:
-      catalogue: ${{ workflow.catalogue.return }}
-      ranking: ${{ workflow.ranking.return }}
-    mapvalues:
-      argnames: df
-      argvalues: ${{ workflow.events_split.return }}
-
-  - id: crosstabs_html
-    task: persist_text
-    partial:
-      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-      filename_suffix: crosstabs
-    mapvalues:
-      argnames: text
-      argvalues: ${{ workflow.crosstabs.return }}
-
-  - id: crosstabs_widget
-    task: create_plot_widget_single_view
-    skipif:
-      conditions:
-        - never
-    partial:
-      title: Cross-tabs
-    map:
-      argnames: [view, data]
-      argvalues: ${{ workflow.crosstabs_html.return }}
-
-  - id: crosstabs_merged
-    task: merge_widget_views
-    skipif:
-      conditions:
-        - never
-    partial:
-      widgets: ${{ workflow.crosstabs_widget.return }}
-
   # ── 6 maps ────────────────────────────────────────────────────────────────────
 
   - id: points_map
@@ -702,26 +650,6 @@ workflow:
       filename: events
       root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
 
-  - id: crosstab_table
-    task: categorical_crosstab_table
-    partial:
-      df: ${{ workflow.events_indexed.return }}
-      catalogue: ${{ workflow.catalogue.return }}
-      ranking: ${{ workflow.ranking.return }}
-
-  - id: crosstab_csv
-    task: persist_df
-    # no cross-tabs chosen: save the empty table (headers only) rather than skip, since a
-    # skipped file would skip the whole dashboard; still skipped when there are no events
-    skipif:
-      conditions:
-        - any_dependency_skipped
-    partial:
-      df: ${{ workflow.crosstab_table.return }}
-      filetype: csv
-      filename: crosstabs
-      root_path: ${{ env.ECOSCOPE_WORKFLOWS_RESULTS }}
-
   - id: values_file
     task: create_files_single_view
     # no events: an empty file list (its fallback), so the dashboard still shows
@@ -740,15 +668,6 @@ workflow:
     partial:
       files: ${{ workflow.events_csv.return }}
 
-  - id: crosstab_file
-    task: create_files_single_view
-    # no events: an empty file list (its fallback), so the dashboard still shows
-    skipif:
-      conditions:
-        - never
-    partial:
-      files: ${{ workflow.crosstab_csv.return }}
-
   - name: Dashboard
     id: dashboard
     task: gather_dashboard
@@ -761,14 +680,11 @@ workflow:
         - ${{ workflow.bars_main_merged.return }}
         - ${{ workflow.sunburst_merged.return }}
         - ${{ workflow.trends_main_merged.return }}
-        - ${{ workflow.crosstabs_merged.return }}
         - ${{ workflow.points_map_merged.return }}
         - ${{ workflow.grid_maps_merged.return }}
         - ${{ workflow.summary_table_merged.return }}
-        - ${{ workflow.field_widgets.return }}
       groupers: ${{ workflow.resolved_groupers.return }}
       time_range: ${{ workflow.time_range.return }}
       files:
         - ${{ workflow.values_file.return }}
         - ${{ workflow.events_file.return }}
-        - ${{ workflow.crosstab_file.return }}
