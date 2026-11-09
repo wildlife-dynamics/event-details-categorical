@@ -32,9 +32,10 @@ jobs:
         if: inputs.download-artifacts
         run: ls -lR /tmp/ecoscope-workflows-custom/release/artifacts
 
+      # No pixi-version pin: pixi.lock is written in lockfile format v7 by a current pixi,
+      # and v0.80.0 rejects it as "not up-to-date". A newer pixi reads older locks fine,
+      # so track the latest release (as uwa-ground-transect does).
       - uses: prefix-dev/setup-pixi@v0.9.6
-        with:
-          pixi-version: v0.80.0
 
       - name: Clean pixi cache
         if: inputs.download-artifacts
