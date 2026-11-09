@@ -73,16 +73,23 @@
           "type": "string"
         },
         "main_field": {
-          "description": "Select the choice field the workflow will summarize, e.g. Species. Each choice will be represented by a different color in the outputs. Type the field as it appears on the form; it must allow one choice per event.",
+          "description": "Select the choice field the workflow will summarize, e.g. Species. Each choice will be represented by a different color in the outputs. The list shows the selected event type's choice fields, including those in repeating groups, e.g. Detection: Species.",
           "title": "Categorical Field - Choice field to analyze",
           "type": "string"
         },
         "count_field": {
           "default": "",
-          "description": "Choose a number field, e.g. Count, to total it for each choice instead of counting records (e.g. animals seen rather than sightings). Type the field as it appears on the form. Leave empty to count records.",
+          "description": "Choose a number field, e.g. Count, to total it for each choice instead of counting records (e.g. animals seen rather than sightings). Leave empty to count records.",
           "ecoscope:advanced": true,
           "title": "Count Field - Number field to total",
           "type": "string"
+        },
+        "split_write_ins": {
+          "default": false,
+          "description": "Show each name written in for an \"Other\" choice as its own value (e.g. \"Other: Flappet Lark\") instead of one Other. The written-in field is the text field the Other choice opens, or the one right after the field on the form. Names are shown as typed.",
+          "ecoscope:advanced": true,
+          "title": "Split Other by Write-in",
+          "type": "boolean"
         },
         "keep_form_order": {
           "default": false,
@@ -500,6 +507,7 @@
         "event_type",
         "main_field",
         "count_field",
+        "split_write_ins",
         "keep_form_order",
         "show_full_list"
       ]

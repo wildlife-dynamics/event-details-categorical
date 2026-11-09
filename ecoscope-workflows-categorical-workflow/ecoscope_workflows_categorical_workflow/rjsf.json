@@ -82,27 +82,54 @@
           ]
         },
         "main_field": {
-          "description": "Select the choice field the workflow will summarize, e.g. Species. Each choice will be represented by a different color in the outputs. Type the field as it appears on the form; it must allow one choice per event.",
+          "description": "Select the choice field the workflow will summarize, e.g. Species. Each choice will be represented by a different color in the outputs. The list shows the selected event type's choice fields, including those in repeating groups, e.g. Detection: Species.",
           "title": "Categorical Field - Choice field to analyze",
-          "type": "string"
+          "type": "string",
+          "ecoscope:transform": [
+            {
+              "transformer": "EarthRangerEnumResolver",
+              "transformer_kws": {
+                "type": "event_type_schema_choice_prop",
+                "depends_on": "properties.fields.properties.event_type",
+                "include_nested": true
+              }
+            }
+          ]
         },
         "count_field": {
           "default": "",
-          "description": "Choose a number field, e.g. Count, to total it for each choice instead of counting records (e.g. animals seen rather than sightings). Type the field as it appears on the form. Leave empty to count records.",
+          "description": "A number field to total for each value, e.g. Count, so the charts show animals counted rather than records. Leave empty to count records.",
           "ecoscope:advanced": true,
-          "title": "Count Field - Number field to total",
-          "type": "string"
+          "title": "Count Field",
+          "type": "string",
+          "ecoscope:transform": [
+            {
+              "transformer": "EarthRangerEnumResolver",
+              "transformer_kws": {
+                "type": "event_type_schema_numeric_prop",
+                "depends_on": "properties.fields.properties.event_type",
+                "include_nested": true
+              }
+            }
+          ]
+        },
+        "split_write_ins": {
+          "default": false,
+          "description": "Show each name typed for an \"Other\" answer as its own value, e.g. \"Other: Flappet Lark\", instead of one \"Other\". Names are kept as typed.",
+          "ecoscope:advanced": true,
+          "title": "Show Typed \"Other\" Names",
+          "type": "boolean"
         },
         "keep_form_order": {
           "default": false,
-          "description": "Show the choices in the order they appear on the form instead of by count, for fields with a natural order, e.g. age class.",
+          "description": "Show the values in the order they appear on the form instead of by count, e.g. for age class or water level.",
           "ecoscope:advanced": true,
           "title": "Keep Form Order",
           "type": "boolean"
         },
         "show_full_list": {
           "default": false,
-          "description": "Show every choice in the outputs instead of the 10 most common plus Other.",
+          "description": "Show every value in the outputs instead of the 10 most common plus \"Other\".",
           "ecoscope:advanced": true,
           "title": "Show Every Value",
           "type": "boolean"
@@ -120,32 +147,20 @@
       "properties": {
         "groupers": {
           "default": null,
-          "description": "Choose how to split the outputs into views, e.g. by year, reporter or area (optional). Leave empty for one view of all events.",
+          "description": "Choose how to split the outputs into views, e.g. by year or reporter (optional). Leave empty for one view of all events.",
           "items": {
             "anyOf": [
-              {
-                "$ref": "#/$defs/ValueGrouper"
-              },
               {
                 "$ref": "#/$defs/TemporalGrouper"
               },
               {
-                "$ref": "#/$defs/SpatialGrouper"
+                "$ref": "#/$defs/ValueGrouper"
               }
             ],
             "title": "Group by"
           },
           "title": " ",
-          "type": "array",
-          "ecoscope:transform": [
-            {
-              "transformer": "EarthRangerEnumResolver",
-              "transformer_kws": {
-                "type": "spatial_feature_group",
-                "depends_on": "properties.er_client.properties.data_source.properties.name"
-              }
-            }
-          ]
+          "type": "array"
         }
       },
       "type": "object",
@@ -345,9 +360,9 @@
       "required": [],
       "title": "Base Maps"
     },
-    "Over Time": {
+    "Time Period": {
       "type": "object",
-      "description": "How the share of each value changes over time.",
+      "description": "The period each bar covers in the chart over time and the tiles' trend lines.",
       "ecoscope:task_group": true,
       "properties": {
         "trend_period": {
@@ -508,10 +523,6 @@
             {
               "const": "reported_by_name",
               "title": "Reported By"
-            },
-            {
-              "const": "quarter",
-              "title": "Quarter"
             }
           ]
         }
@@ -542,6 +553,7 @@
         "event_type",
         "main_field",
         "count_field",
+        "split_write_ins",
         "keep_form_order",
         "show_full_list"
       ]
@@ -553,18 +565,13 @@
       "fields",
       "groupers",
       "base_maps",
-      "Over Time",
+      "Time Period",
       "Grid Map"
     ],
     "groupers": {
       "groupers": {
         "items": {
           "anyOf": [
-            {
-              "ui:options": {
-                "label": false
-              }
-            },
             {
               "ui:options": {
                 "label": false

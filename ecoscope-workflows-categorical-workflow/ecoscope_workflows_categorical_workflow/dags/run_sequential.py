@@ -9,9 +9,6 @@ from ecoscope.platform.tasks.filter import (
 from ecoscope.platform.tasks.filter import set_time_range as set_time_range
 from ecoscope.platform.tasks.groupby import set_groupers as set_groupers
 from ecoscope.platform.tasks.groupby import split_groups as split_groups
-from ecoscope.platform.tasks.io import (
-    get_spatial_features_group as get_spatial_features_group,
-)
 from ecoscope.platform.tasks.io import persist_df as persist_df
 from ecoscope.platform.tasks.io import persist_text as persist_text
 from ecoscope.platform.tasks.io import set_er_connection as set_er_connection
@@ -37,22 +34,10 @@ from ecoscope.platform.tasks.skip import (
 from ecoscope.platform.tasks.skip import any_is_empty_df as any_is_empty_df
 from ecoscope.platform.tasks.skip import never as never
 from ecoscope.platform.tasks.transformation import (
-    add_spatial_index as add_spatial_index,
-)
-from ecoscope.platform.tasks.transformation import (
     add_temporal_index as add_temporal_index,
 )
 from ecoscope.platform.tasks.transformation import (
     convert_values_to_timezone as convert_values_to_timezone,
-)
-from ecoscope.platform.tasks.transformation import (
-    extract_spatial_grouper_feature_group_names as extract_spatial_grouper_feature_group_names,
-)
-from ecoscope.platform.tasks.transformation import (
-    resolve_spatial_feature_groups_for_spatial_groupers as resolve_spatial_feature_groups_for_spatial_groupers,
-)
-from ecoscope_workflows_ext_wd.tasks import (
-    add_categorical_quarter as add_categorical_quarter,
 )
 from ecoscope_workflows_ext_wd.tasks import (
     categorical_events_table as categorical_events_table,
@@ -285,79 +270,6 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         .call()
     )
 
-    events_quarter = (
-        task(add_categorical_quarter)
-        .validate()
-        .set_task_instance_id("events_quarter")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(df=events_local_time, **(params.get("events_quarter") or {}))
-        .call()
-    )
-
-    spatial_group_ids = (
-        task(extract_spatial_grouper_feature_group_names)
-        .validate()
-        .set_task_instance_id("spatial_group_ids")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(groupers=groupers, **(params.get("spatial_group_ids") or {}))
-        .call()
-    )
-
-    fetch_all_spatial_feature_groups = (
-        task(get_spatial_features_group)
-        .validate()
-        .set_task_instance_id("fetch_all_spatial_feature_groups")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            client=er_client, **(params.get("fetch_all_spatial_feature_groups") or {})
-        )
-        .map(argnames=["spatial_features_group_name"], argvalues=spatial_group_ids)
-    )
-
-    resolved_groupers = (
-        task(resolve_spatial_feature_groups_for_spatial_groupers)
-        .validate()
-        .set_task_instance_id("resolved_groupers")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                never,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            groupers=groupers,
-            spatial_feature_groups=fetch_all_spatial_feature_groups,
-            **(params.get("resolved_groupers") or {}),
-        )
-        .call()
-    )
-
     events_temporal_index = (
         task(add_temporal_index)
         .validate()
@@ -372,33 +284,12 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=events_quarter,
+            df=events_local_time,
             time_col="time",
-            groupers=resolved_groupers,
+            groupers=groupers,
             cast_to_datetime=True,
             format="mixed",
             **(params.get("events_temporal_index") or {}),
-        )
-        .call()
-    )
-
-    events_indexed = (
-        task(add_spatial_index)
-        .validate()
-        .set_task_instance_id("events_indexed")
-        .handle_errors()
-        .with_tracing()
-        .skipif(
-            conditions=[
-                any_is_empty_df,
-                any_dependency_skipped,
-            ],
-            unpack_depth=1,
-        )
-        .partial(
-            gdf=events_temporal_index,
-            groupers=resolved_groupers,
-            **(params.get("events_indexed") or {}),
         )
         .call()
     )
@@ -417,7 +308,9 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=events_indexed, catalogue=catalogue, **(params.get("ranking") or {})
+            df=events_temporal_index,
+            catalogue=catalogue,
+            **(params.get("ranking") or {}),
         )
         .call()
     )
@@ -436,8 +329,8 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=events_indexed,
-            groupers=resolved_groupers,
+            df=events_temporal_index,
+            groupers=groupers,
             **(params.get("events_split") or {}),
         )
         .call()
@@ -570,7 +463,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             ],
             unpack_depth=1,
         )
-        .partial(df=events_indexed, **(params.get("grid") or {}))
+        .partial(df=events_temporal_index, **(params.get("grid") or {}))
         .call()
     )
 
@@ -728,7 +621,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
         )
         .partial(
             catalogue=catalogue,
-            template="{main}: blank",
+            template="Unassigned {main}",
             **(params.get("kpi_blank_title") or {}),
         )
         .call()
@@ -1341,7 +1234,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=events_indexed,
+            df=events_temporal_index,
             catalogue=catalogue,
             cell_km=grid,
             **(params.get("all_values_table") or {}),
@@ -1386,7 +1279,9 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
             unpack_depth=1,
         )
         .partial(
-            df=events_indexed, catalogue=catalogue, **(params.get("events_table") or {})
+            df=events_temporal_index,
+            catalogue=catalogue,
+            **(params.get("events_table") or {}),
         )
         .call()
     )
@@ -1472,7 +1367,7 @@ def main(params: dict[str, Any], validate_params_schema: bool = True):
                 grid_maps_merged,
                 summary_table_merged,
             ],
-            groupers=resolved_groupers,
+            groupers=groupers,
             time_range=time_range,
             files=[values_file, events_file],
             **(params.get("dashboard") or {}),

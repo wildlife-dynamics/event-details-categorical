@@ -1,26 +1,27 @@
 workflow_details:
-  name: Elephant Sightings - Location
-  description: Naibunga Lower elephant sightings, by year
+  name: Bird Point Counts - Species
+  description: WD bird point counts, species per detection
 
 er_client:
   data_source:
-    name: naibungalower
+    name: wd
 
 time_range:
-  since: "2018-01-01T00:00:00.000Z"
-  until: "2026-10-01T00:00:00.000Z"
+  since: "2026-01-01T00:00:00.000Z"
+  until: "2026-11-09T00:00:00.000Z"
   timezone: {label: "UTC+03:00", tzCode: Africa/Nairobi, name: Africa/Nairobi, utc: "+03:00"}
 
-# Event type: picked from a dropdown. Fields: typed as they read on the form.
+# Event type and fields: picked from dropdowns, which save the field keys.
 fields:
-  event_type: elephant_sighting_rep
-  main_field: Location
+  event_type: bird_point_count
+  main_field: detections.species
+  count_field: detections.count
+  split_write_ins: true
   keep_form_order: false
   show_full_list: false
 
 groupers:
-  groupers:
-    - temporal_index: "%Y"
+  groupers: []
 
 base_maps: {}
 

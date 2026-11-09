@@ -53,7 +53,7 @@
             "data": "tmpfile",
             "id": 2,
             "is_filtered": true,
-            "title": "Detection: Species: blank",
+            "title": "Unassigned Detection: Species",
             "widget_type": "graph"
           },
           {

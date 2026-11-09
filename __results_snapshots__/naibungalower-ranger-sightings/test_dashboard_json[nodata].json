@@ -53,7 +53,7 @@
             "data": "tmpfile",
             "id": 2,
             "is_filtered": true,
-            "title": "Water Status: blank",
+            "title": "Unassigned Water Status",
             "widget_type": "graph"
           },
           {
