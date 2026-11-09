@@ -110,12 +110,12 @@ wd-bird-point-count:
     grid: {}
 
 naibungalower-carcass-invented:
-  name: Invented carcasses on Naibunga Lower's Animal Carcass form, by quarter
+  name: Invented carcasses on Naibunga Lower's Animal Carcass form, by year
   description: >-
     Follow-up fields (own mock data in mock-io/naibungalower-carcass-invented/: the real form,
     260 invented events): Type of Death opens Cause of Death (POACHED / NATURAL / CONFLICT /
     PAC), which share one sunburst ring; "Unknown - please describe in notes"; a pick-several
-    field; one view per quarter.
+    field; one view per year.
   params:
     workflow_details:
       name: Carcasses - Type of Death
@@ -134,7 +134,7 @@ naibungalower-carcass-invented:
       show_full_list: false
     groupers:
       groupers:
-        - index_name: quarter
+        - temporal_index: "%Y"
     base_maps: {}
     trend_period: {period: auto}
     grid: {}

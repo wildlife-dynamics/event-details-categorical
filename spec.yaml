@@ -1,4 +1,36 @@
 id: categorical
+metadata:
+  name: Event Details - Categorical Field Workflow
+  description: >-
+    Summarises one dropdown field of an EarthRanger event type, such as species, cause of death
+    or water level: which values were recorded, how often, when and where. One event type per
+    run (v2 forms). Supports follow-up questions, repeating lists (e.g. one row per species
+    seen) and an optional number field to total per value (e.g. birds counted).
+  maintainers:
+    - name: Zakariya Husayn
+      email: zakariya@wildlifedynamics.com
+      role: owner
+  outputs:
+    - name: Categorical Field Dashboard
+      type: dashboard
+      description: >-
+        Headline tiles, a bar chart and breakdown sunburst of the field's values, the values
+        over time, a points map, a grid density map and a values table.
+      indicators:
+        - name: Event field values
+    - name: Values and events tables
+      type: file
+      description: >-
+        values_summary.csv (every value with its count and share) and events.csv (one row per
+        event with the field and its follow-up answers; no reporter names).
+      indicators:
+        - name: Event field values
+  license: BSD-3-Clause
+  repository: https://github.com/wildlife-dynamics/event-details-categorical
+  documentation: https://github.com/wildlife-dynamics/event-details-categorical#readme
+  readme: README.md
+  keywords: [event-details, categorical, earthranger, species, dropdown]
+  thumbnail: resources/thumbnail.png
 
 requirements:
   - name: ecoscope-platform
@@ -17,30 +49,58 @@ requirements:
 
   # wd-partner-tasks: src/ecoscope-workflows-ext-wd (categorical tasks: _categorical.py).
   - name: ecoscope-workflows-ext-wd
-    version: "0.0.15"
+    version: "0.0.16"
     channel: https://repo.prefix.dev/ecoscope-workflows-custom/
 
 rjsf-overrides:
   properties:
     time_range.description: Choose the period. Events created in this period are included.
 
-    # Event type: a dropdown of the site's event types. The field names are typed for
-    # now: EarthRangerEnumResolver can't list categorical fields for this workflow yet
-    # (PLAN.md section 2). When it can, add a transform per field here.
+    # Event type: a dropdown of the site's event types.
     fields.properties.event_type.ecoscope:transform:
       - transformer: EarthRangerEnumResolver
         transformer_kws:
           type: event_type
           depends_on: properties.er_client.properties.data_source.properties.name
 
-    groupers.properties.groupers.description: >-
-      Choose how to split the outputs into views, e.g. by year, reporter or area
-      (optional). Leave empty for one view of all events.
-    groupers.properties.groupers.ecoscope:transform:
+    # Field dropdowns: the selected event type's choice and number fields. include_nested
+    # also lists fields in repeating groups (Detection: Species), follow-up questions and
+    # yes/no fields; it needs ecoscope-server with include_nested (compose #3343).
+    fields.properties.main_field.ecoscope:transform:
       - transformer: EarthRangerEnumResolver
         transformer_kws:
-          type: spatial_feature_group
-          depends_on: properties.er_client.properties.data_source.properties.name
+          type: event_type_schema_choice_prop
+          depends_on: properties.fields.properties.event_type
+          include_nested: true
+    fields.properties.count_field.ecoscope:transform:
+      - transformer: EarthRangerEnumResolver
+        transformer_kws:
+          type: event_type_schema_numeric_prop
+          depends_on: properties.fields.properties.event_type
+          include_nested: true
+
+    # Advanced field titles and help text (the task's own text is more technical).
+    fields.properties.count_field.title: Count Field
+    fields.properties.count_field.description: >-
+      A number field to total for each value, e.g. Count, so the charts show animals counted
+      rather than records. Leave empty to count records.
+    fields.properties.split_write_ins.title: Show Typed "Other" Names
+    fields.properties.split_write_ins.description: >-
+      Show each name typed for an "Other" answer as its own value, e.g. "Other: Flappet
+      Lark", instead of one "Other". Names are kept as typed.
+    fields.properties.keep_form_order.description: >-
+      Show the values in the order they appear on the form instead of by count, e.g. for age
+      class or water level.
+    fields.properties.show_full_list.description: >-
+      Show every value in the outputs instead of the 10 most common plus "Other".
+
+    # Group by: time or reporter only (no spatial regions, no quarter)
+    groupers.properties.groupers.description: >-
+      Choose how to split the outputs into views, e.g. by year or reporter (optional).
+      Leave empty for one view of all events.
+    groupers.properties.groupers.items.anyOf:
+      - $ref: "#/$defs/TemporalGrouper"
+      - $ref: "#/$defs/ValueGrouper"
 
     base_maps.properties.base_maps.description: >-
       Select tile layers to use as base layers in map outputs. The first layer in the
@@ -50,14 +110,9 @@ rjsf-overrides:
     ValueGrouper.properties.index_name.oneOf:
       - const: reported_by_name
         title: Reported By
-      # from add_categorical_quarter: the platform's time grouper has no quarter
-      - const: quarter
-        title: Quarter
 
   uiSchema:
     groupers.groupers.items.anyOf:
-      - ui:options:
-          label: false
       - ui:options:
           label: false
       - ui:options:
@@ -125,68 +180,35 @@ workflow:
       columns:
         - time
 
-  - id: events_quarter
-    task: add_categorical_quarter
-    partial:
-      df: ${{ workflow.events_local_time.return }}
-
-  - id: spatial_group_ids
-    task: extract_spatial_grouper_feature_group_names
-    partial:
-      groupers: ${{ workflow.groupers.return }}
-
-  - id: fetch_all_spatial_feature_groups
-    task: get_spatial_features_group
-    partial:
-      client: ${{ workflow.er_client.return }}
-    map:
-      argnames: spatial_features_group_name
-      argvalues: ${{ workflow.spatial_group_ids.return }}
-
-  - id: resolved_groupers
-    task: resolve_spatial_feature_groups_for_spatial_groupers
-    skipif:
-      conditions:
-        - never
-    partial:
-      groupers: ${{ workflow.groupers.return }}
-      spatial_feature_groups: ${{ workflow.fetch_all_spatial_feature_groups.return }}
-
   - id: events_temporal_index
     task: add_temporal_index
     partial:
-      df: ${{ workflow.events_quarter.return }}
+      df: ${{ workflow.events_local_time.return }}
       time_col: time
-      groupers: ${{ workflow.resolved_groupers.return }}
+      groupers: ${{ workflow.groupers.return }}
       cast_to_datetime: true
       format: mixed
-
-  - id: events_indexed
-    task: add_spatial_index
-    partial:
-      gdf: ${{ workflow.events_temporal_index.return }}
-      groupers: ${{ workflow.resolved_groupers.return }}
 
   # ranking, colours and grid size come from the whole run, before grouping, so a value
   # keeps its colour (and Other holds the same values) in every view
   - id: ranking
     task: rank_categorical_values
     partial:
-      df: ${{ workflow.events_indexed.return }}
+      df: ${{ workflow.events_temporal_index.return }}
       catalogue: ${{ workflow.catalogue.return }}
 
   - id: events_split
     task: split_groups
     partial:
-      df: ${{ workflow.events_indexed.return }}
-      groupers: ${{ workflow.resolved_groupers.return }}
+      df: ${{ workflow.events_temporal_index.return }}
+      groupers: ${{ workflow.groupers.return }}
 
   # ── 4 over time ───────────────────────────────────────────────────────────────
   # (before the headline tiles, which use the trend period)
 
-  - title: Over Time
+  - title: Time Period
     type: task-group
-    description: How the share of each value changes over time.
+    description: The period each bar covers in the chart over time and the tiles' trend lines.
     tasks:
       - id: trend_period
         task: set_categorical_trend_period
@@ -245,7 +267,7 @@ workflow:
       - id: grid
         task: set_categorical_grid
         partial:
-          df: ${{ workflow.events_indexed.return }}
+          df: ${{ workflow.events_temporal_index.return }}
 
       - id: grid_maps
         task: draw_categorical_grid_maps
@@ -315,7 +337,7 @@ workflow:
     task: categorical_widget_title
     partial:
       catalogue: ${{ workflow.catalogue.return }}
-      template: "{main}: blank"
+      template: "Unassigned {main}"
 
   - id: kpi_events
     task: draw_categorical_kpi
@@ -624,7 +646,7 @@ workflow:
   - id: all_values_table
     task: categorical_summary_table
     partial:
-      df: ${{ workflow.events_indexed.return }}
+      df: ${{ workflow.events_temporal_index.return }}
       catalogue: ${{ workflow.catalogue.return }}
       cell_km: ${{ workflow.grid.return }}
 
@@ -639,7 +661,7 @@ workflow:
   - id: events_table
     task: categorical_events_table
     partial:
-      df: ${{ workflow.events_indexed.return }}
+      df: ${{ workflow.events_temporal_index.return }}
       catalogue: ${{ workflow.catalogue.return }}
 
   - id: events_csv
@@ -683,7 +705,7 @@ workflow:
         - ${{ workflow.points_map_merged.return }}
         - ${{ workflow.grid_maps_merged.return }}
         - ${{ workflow.summary_table_merged.return }}
-      groupers: ${{ workflow.resolved_groupers.return }}
+      groupers: ${{ workflow.groupers.return }}
       time_range: ${{ workflow.time_range.return }}
       files:
         - ${{ workflow.values_file.return }}

@@ -36,7 +36,7 @@
             "data": null,
             "id": 2,
             "is_filtered": false,
-            "title": "Water Status: blank",
+            "title": "Unassigned Water Status",
             "widget_type": "graph"
           },
           {
