@@ -101,8 +101,14 @@ if [ "$skip_setup" = false ]; then
     [ "$quiet" = false ] && echo "Updating pixi environment..."
     pixi update --manifest-path $manifest_path
     [ "$quiet" = false ] && echo "Installing playwright..."
-    run_cmd pip install playwright
-    run_cmd bash -c "playwright install --with-deps chromium"
+    # The default env has no pip since ext-custom (which brought it) was dropped, and this
+    # workflow's CLI run needs no browser, so install playwright only where pip exists.
+    if run_cmd python -c "import pip" > /dev/null 2>&1; then
+        run_cmd pip install playwright
+        run_cmd bash -c "playwright install --with-deps chromium"
+    else
+        [ "$quiet" = false ] && echo "No pip in the default env: skipping playwright (not needed for the CLI run)"
+    fi
 else
     [ "$quiet" = false ] && echo "Skipping pixi update and playwright-install (--skip-setup or --local flag provided)"
 fi
