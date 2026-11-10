@@ -37,10 +37,6 @@ requirements:
     version: ">=2.23.0,<3.0.0"
     channel: https://repo.prefix.dev/ecoscope-workflows/
 
-  - name: ecoscope-workflows-ext-custom
-    version: "0.1.2"
-    channel: https://repo.prefix.dev/ecoscope-workflows-custom/
-
   # ecoscope-platform already requires pydeck==0.9.2, which is only on conda-forge;
   # pinned here so strict channel priority can resolve it (as in event-details).
   - name: pydeck
@@ -49,7 +45,7 @@ requirements:
 
   # wd-partner-tasks: src/ecoscope-workflows-ext-wd (categorical tasks: _categorical.py).
   - name: ecoscope-workflows-ext-wd
-    version: "0.0.18"
+    version: "0.0.19"
     channel: https://repo.prefix.dev/ecoscope-workflows-custom/
 
 rjsf-overrides:
