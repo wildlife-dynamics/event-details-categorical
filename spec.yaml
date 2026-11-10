@@ -49,7 +49,7 @@ requirements:
 
   # wd-partner-tasks: src/ecoscope-workflows-ext-wd (categorical tasks: _categorical.py).
   - name: ecoscope-workflows-ext-wd
-    version: "0.0.16"
+    version: "0.0.18"
     channel: https://repo.prefix.dev/ecoscope-workflows-custom/
 
 rjsf-overrides:
@@ -72,18 +72,12 @@ rjsf-overrides:
           type: event_type_schema_choice_prop
           depends_on: properties.fields.properties.event_type
           include_nested: true
-    fields.properties.count_field.ecoscope:transform:
-      - transformer: EarthRangerEnumResolver
-        transformer_kws:
-          type: event_type_schema_numeric_prop
-          depends_on: properties.fields.properties.event_type
-          include_nested: true
 
     # Advanced field titles and help text (the task's own text is more technical).
-    fields.properties.count_field.title: Count Field
-    fields.properties.count_field.description: >-
-      A number field to total for each value, e.g. Count, so the charts show animals counted
-      rather than records. Leave empty to count records.
+    fields.properties.count_by.description: >-
+      Events counts each event once, or each row for a field in a list, e.g. each detection
+      for Detection: Species. Numeric Field adds up a number on the form, e.g. Count, to show
+      animals counted rather than sightings.
     fields.properties.split_write_ins.title: Show Typed "Other" Names
     fields.properties.split_write_ins.description: >-
       Show each name typed for an "Other" answer as its own value, e.g. "Other: Flappet
@@ -107,11 +101,34 @@ rjsf-overrides:
       list will be the bottommost layer displayed.
 
   $defs:
+    # Count By: the Field dropdown only shows (and is only required) once "Numeric Field" is
+    # picked, so Events needs no answer (the web marks every dropdown required).
+    SumNumericField.properties.field.ecoscope:transform:
+      - transformer: EarthRangerEnumResolver
+        transformer_kws:
+          type: event_type_schema_numeric_prop
+          depends_on: properties.fields.properties.event_type
+          include_nested: true
     ValueGrouper.properties.index_name.oneOf:
       - const: reported_by_name
         title: Reported By
 
   uiSchema:
+    # Count By: show only the Events / Numeric Field picker (and the Field dropdown),
+    # not each option's own title and fixed "Count By" value (as ops-dashboard
+    # does for Auto-scale / Customize).
+    fields.count_by:
+      anyOf:
+        - ui:options:
+            label: false
+          count_by:
+            ui:widget: hidden
+        - ui:options:
+            label: false
+          count_by:
+            ui:widget: hidden
+      count_by:
+        ui:widget: hidden
     groupers.groupers.items.anyOf:
       - ui:options:
           label: false

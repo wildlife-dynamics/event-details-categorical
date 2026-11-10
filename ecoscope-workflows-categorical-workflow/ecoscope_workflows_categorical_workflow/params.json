@@ -77,12 +77,21 @@
           "title": "Categorical Field - Choice field to analyze",
           "type": "string"
         },
-        "count_field": {
-          "default": "",
-          "description": "Choose a number field, e.g. Count, to total it for each choice instead of counting records (e.g. animals seen rather than sightings). Leave empty to count records.",
+        "count_by": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CountEvents"
+            },
+            {
+              "$ref": "#/$defs/SumNumericField"
+            }
+          ],
+          "default": {
+            "count_by": "Events"
+          },
+          "description": "Events counts each event once, or each row for a field in a list, e.g. each detection for Detection: Species. Numeric Field adds up a number on the form, e.g. Count, to show animals counted rather than sightings.",
           "ecoscope:advanced": true,
-          "title": "Count Field - Number field to total",
-          "type": "string"
+          "title": "Count By"
         },
         "split_write_ins": {
           "default": false,
@@ -414,6 +423,40 @@
       "title": "TimezoneInfo",
       "type": "object"
     },
+    "CountEvents": {
+      "properties": {
+        "count_by": {
+          "const": "Events",
+          "default": "Events",
+          "ecoscope:advanced": true,
+          "title": "Count By",
+          "type": "string"
+        }
+      },
+      "title": "Events",
+      "type": "object"
+    },
+    "SumNumericField": {
+      "properties": {
+        "count_by": {
+          "const": "Numeric Field",
+          "default": "Numeric Field",
+          "ecoscope:advanced": true,
+          "title": "Count By",
+          "type": "string"
+        },
+        "field": {
+          "description": "The numeric field to add up for each value, e.g. Count.",
+          "title": "Field",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field"
+      ],
+      "title": "Numeric Field",
+      "type": "object"
+    },
     "SpatialGrouper": {
       "properties": {
         "spatial_index_name": {
@@ -506,7 +549,7 @@
       "ui:order": [
         "event_type",
         "main_field",
-        "count_field",
+        "count_by",
         "split_write_ins",
         "keep_form_order",
         "show_full_list"
