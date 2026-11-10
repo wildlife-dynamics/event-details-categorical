@@ -15,7 +15,7 @@ time_range:
 fields:
   event_type: bird_point_count
   main_field: detections.species
-  count_field: detections.count
+  count_by: {count_by: Numeric Field, field: detections.count}
   split_write_ins: true
   keep_form_order: false
   show_full_list: false

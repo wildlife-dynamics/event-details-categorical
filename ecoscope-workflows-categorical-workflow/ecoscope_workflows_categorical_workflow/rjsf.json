@@ -96,22 +96,21 @@
             }
           ]
         },
-        "count_field": {
-          "default": "",
-          "description": "A number field to total for each value, e.g. Count, so the charts show animals counted rather than records. Leave empty to count records.",
-          "ecoscope:advanced": true,
-          "title": "Count Field",
-          "type": "string",
-          "ecoscope:transform": [
+        "count_by": {
+          "anyOf": [
             {
-              "transformer": "EarthRangerEnumResolver",
-              "transformer_kws": {
-                "type": "event_type_schema_numeric_prop",
-                "depends_on": "properties.fields.properties.event_type",
-                "include_nested": true
-              }
+              "$ref": "#/$defs/CountEvents"
+            },
+            {
+              "$ref": "#/$defs/SumNumericField"
             }
-          ]
+          ],
+          "default": {
+            "count_by": "Events"
+          },
+          "description": "Events counts each event once, or each row for a field in a list, e.g. each detection for Detection: Species. Numeric Field adds up a number on the form, e.g. Count, to show animals counted rather than sightings.",
+          "ecoscope:advanced": true,
+          "title": "Count By"
         },
         "split_write_ins": {
           "default": false,
@@ -454,6 +453,50 @@
       "title": "TimezoneInfo",
       "type": "object"
     },
+    "CountEvents": {
+      "properties": {
+        "count_by": {
+          "const": "Events",
+          "default": "Events",
+          "ecoscope:advanced": true,
+          "title": "Count By",
+          "type": "string"
+        }
+      },
+      "title": "Events",
+      "type": "object"
+    },
+    "SumNumericField": {
+      "properties": {
+        "count_by": {
+          "const": "Numeric Field",
+          "default": "Numeric Field",
+          "ecoscope:advanced": true,
+          "title": "Count By",
+          "type": "string"
+        },
+        "field": {
+          "description": "The numeric field to add up for each value, e.g. Count.",
+          "title": "Field",
+          "type": "string",
+          "ecoscope:transform": [
+            {
+              "transformer": "EarthRangerEnumResolver",
+              "transformer_kws": {
+                "type": "event_type_schema_numeric_prop",
+                "depends_on": "properties.fields.properties.event_type",
+                "include_nested": true
+              }
+            }
+          ]
+        }
+      },
+      "required": [
+        "field"
+      ],
+      "title": "Numeric Field",
+      "type": "object"
+    },
     "SpatialGrouper": {
       "properties": {
         "spatial_index_name": {
@@ -552,11 +595,34 @@
       "ui:order": [
         "event_type",
         "main_field",
-        "count_field",
+        "count_by",
         "split_write_ins",
         "keep_form_order",
         "show_full_list"
-      ]
+      ],
+      "count_by": {
+        "anyOf": [
+          {
+            "ui:options": {
+              "label": false
+            },
+            "count_by": {
+              "ui:widget": "hidden"
+            }
+          },
+          {
+            "ui:options": {
+              "label": false
+            },
+            "count_by": {
+              "ui:widget": "hidden"
+            }
+          }
+        ],
+        "count_by": {
+          "ui:widget": "hidden"
+        }
+      }
     },
     "ui:order": [
       "workflow_details",
