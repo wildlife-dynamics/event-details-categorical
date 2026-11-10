@@ -100,7 +100,7 @@ wd-bird-point-count:
     fields:
       event_type: bird_point_count
       main_field: "Detection: Species"
-      count_field: "Detection: Count"
+      count_by: {count_by: Numeric Field, field: "Detection: Count"}
       keep_form_order: false
       show_full_list: false
     groupers:

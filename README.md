@@ -44,7 +44,7 @@ The same setting is also available in Group Policy: *Computer Configuration → 
 | Time Range | Since, until, time zone | Events recorded in the period |
 | **Event Type and Fields** | **Event Type** (required) | Picked from the site's event types |
 | | **Categorical Field** (required) | Picked from the event type's dropdown fields that allow one choice (pick one or yes/no), including fields in repeating lists and follow-up questions. See [Choosing the field](#choosing-the-field). Its follow-up questions are added to the breakdown chart automatically |
-| | Count Field *(advanced)* | Picked from the event type's number fields: totalled for each choice instead of counting records, e.g. `Count` or `Detection: Count` (birds counted rather than sightings). Leave empty to count records |
+| | Count By *(advanced)* | **Events** (the default) counts each event once, or each row for a field in a list, e.g. each detection. **Numeric Field** adds up a number field picked from the event type's number fields (the **Field** dropdown) for each choice, e.g. `Count` or `Detection: Count` (birds counted rather than sightings) |
 | | Show Typed "Other" Names *(advanced)* | Show each name typed for an "Other" answer as its own value, e.g. "Other: Flappet Lark", kept as typed. The typed name is taken from the text field the Other choice opens, or the one right after the field on the form |
 | | Keep Form Order *(advanced)* | Tick when the choices have a natural order (age class, water level): shown in form order instead of by count |
 | | Show Every Value *(advanced)* | Show every value instead of the top 10 plus "Other" |
@@ -55,23 +55,23 @@ The same setting is also available in Group Policy: *Computer Configuration → 
 
 ### Choosing the field
 
-Once an event type is picked, **Categorical Field** and **Count Field** list that form's fields by their titles, e.g. `Water Status`. The configuration stores the field key (`water_status`).
+Once an event type is picked, **Categorical Field** and **Field** (under Count By: Numeric Field) list that form's fields by their titles, e.g. `Water Status`. The configuration stores the field key (`water_status`).
 
 Fields inside repeating lists, follow-up questions and yes/no fields are listed on Ecoscope Web. Ecoscope Desktop 1.3.0 lists only the form's top-level fields.
 
 - **Follow-up questions**, e.g. *Cause of Death (POACHED)*, asked only when *Type of Death* is "Poached": pick *Type of Death* and its follow-ups form the outer ring of the breakdown chart. A follow-up can also be picked itself; it is then counted only on the events where it was asked.
-- **Repeating lists**, e.g. a Bird Point Count with one row per species seen: pick `Detection: Species` (list name, then field). Each row then counts as a record, so the dashboard counts detections rather than events. A Count Field from the same list (`Detection: Count`) totals per row.
+- **Repeating lists**, e.g. a Bird Point Count with one row per species seen: pick `Detection: Species` (list name, then field). Each row then counts as a record, so the dashboard counts detections rather than events. Count By: Numeric Field with a field from the same list (`Detection: Count`) adds it up per row.
 
 ## Dashboard
 
 | Widget | Shows |
 |---|---|
-| Events (or Total *Count Field*) · Distinct values · Unassigned *field* | Headline tiles, each with a trend line over the whole period. Distinct values counts Unknown (a choice on the form); Unassigned is the number of records where the field was left blank |
+| Events (or Total *Field*) · Distinct values · Unassigned *field* | Headline tiles, each with a trend line over the whole period. Distinct values counts Unknown (a choice on the form); Unassigned is the number of records where the field was left blank |
 | *Field* | Bar chart: the top 10 values plus "Other", with count and share, each value in its own colour |
 | Breakdown | Sunburst chart with the field's name in the middle, then its values, then their follow-up answers (e.g. type of death, then cause). Click a slice to zoom, the middle to zoom out. "Other" opens onto the next 10 values and its own "Other", so clicking down reaches every value |
 | *Field* over time | Share of each value per period (100% stacked bars); switch to Counts or Lines. Double-click a value in the legend to show only it |
-| *Field* by location | Map of events coloured by value, sized by how many were recorded at the same spot (with a Count Field: sized and labelled by its total, the tooltip shows both). Buttons: All, then the top 10 values, then an **Others** list with every other value; a value's events in colour, the other events as grey dots. The legend follows the selected tab |
-| *Field* density (*n* km squares) | Grid map with the same buttons and Others list: darker squares hold more events (with a Count Field: a larger total); squares with fewer than 5 records are pale |
+| *Field* by location | Map of events coloured by value, sized by how many were recorded at the same spot (with Count By: Numeric Field, sized and labelled by its total, the tooltip shows both). Buttons: All, then the top 10 values, then an **Others** list with every other value; a value's events in colour, the other events as grey dots. The legend follows the selected tab |
+| *Field* density (*n* km squares) | Grid map with the same buttons and Others list: darker squares hold more events (with Count By: Numeric Field, a larger total); squares with fewer than 5 records are pale |
 | Values table | Every value of the field and its follow-ups: count, share, grid squares and reporters. A follow-up's share is out of the events where it was asked, not all events |
 
 **Files** (Files tab): `values_summary.csv` (the values table) and `events.csv` (one row per event with the field and its follow-ups; no reporter names).
@@ -79,7 +79,7 @@ Fields inside repeating lists, follow-up questions and yes/no fields are listed 
 ### How values are counted
 
 - **Other:** less common values are grouped as "Other (k values)", shown in magenta; hover to see what it holds. Values tied at the cut-off are kept together.
-- **Records or totals:** without a Count Field, every chart counts records (events, or rows of a repeating list). With one, tiles, bars, the breakdown and charts over time total that field; the values table shows both (Count and Total), and the maps size and shade by it. Unassigned and Distinct values always count records.
+- **Records or totals:** with Count By: Events, every chart counts records (events, or rows of a list) (events, or rows of a repeating list). With Numeric Field, tiles, bars, the breakdown and charts over time total that field; the values table shows both (Count and Total), and the maps size and shade by it. Unassigned and Distinct values always count records.
 - **Typed "Other" names:** with Show Typed "Other" Names, each name typed for "Other" is its own value ("Other: …"), kept as typed, so spelling variants stay separate.
 - **Unknown** is a choice like any other: it has its own colour and counts as a distinct value. Answers such as "Unknown – please describe in notes" count as Unknown.
 - **Blank** (unanswered) is shown in grey, never dropped. Light grey dots on a map tab are the other events.
@@ -112,5 +112,5 @@ make test        # run a test case: make test CASE=naibungalower-post-report
 | `naibungalower-post-report-no-events` | A period with no events |
 | `naibungalower-wildlife-sighting` | Many values, "Other" and ties, one view per reporter |
 | `naibungalower-ranger-sightings` | Many blank answers, no grouping |
-| `wd-bird-point-count` | A repeating list (detections), with a Count Field |
+| `wd-bird-point-count` | A repeating list (detections), Count By: Numeric Field |
 | `naibungalower-carcass-invented` | Follow-up questions, one view per year (invented data on the real form) |
